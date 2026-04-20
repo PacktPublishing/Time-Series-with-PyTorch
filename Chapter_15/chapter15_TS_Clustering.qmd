@@ -1,0 +1,1249 @@
+---
+title: "Time Series Clustering"
+bibliography: references/tsclustering.bib
+format: 
+  docx:
+    reference-doc: templates\packt-sample-chapter.docx
+    toc: true  
+    toc-depth: 4 
+    number-sections: true 
+    toc-title: Contents
+---
+```{python}
+#| label: setup-libraries
+#| message: false
+#| echo: false
+#| eval: true
+
+import time
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.spatial.distance import euclidean
+import seaborn as sns
+
+from datetime import datetime
+from pathlib import Path
+from typing import Union, Sequence
+from IPython.display import display, HTML
+
+palette = ["#000000", "#0072B2", "#D55E00","#009E73","#CC79A7", "#56B4E9","#E69F00"]
+custom_palette = palette  # alias used in later plotting code
+
+class CFG:
+    data_folder = Path.cwd().parent / "data"
+    img_dim1 = 8
+    img_dim2 = 4
+
+def display_html_table(
+    df: pd.DataFrame,
+    n_rows: int = 3,
+    cols: Union[int, Sequence[str], None] = None
+) -> None:
+    """
+    Display a DataFrame with HTML in IPython.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame to display.
+    n_rows : int, optional (default=3)
+        Number of top rows to show (uses df.head(n_rows)).
+    cols : int, sequence of str, or None, optional
+        - If None: show all columns.
+        - If int: show the first `cols` columns.
+        - If list of str: show only the specified column names.
+
+    Examples
+    --------
+    display_html_table(df, n_rows=3, cols=6)
+    display_html_table(df, n_rows=3, cols=['sales','price'])
+    """
+    sub = df.head(n_rows)
+    
+    if isinstance(cols, int):
+        sub = sub.iloc[:, :cols]
+    elif isinstance(cols, (list, tuple)):
+        sub = sub.loc[:, cols]
+    
+    html = sub.to_html(classes="table table-striped", border=0)
+    display(HTML(html))
+```
+
+# Time Series Clustering
+
+"If intelligence were a cake, unsupervised learning would be the cake, supervised learning the icing, and reinforcement learning the cherry on top. We know how to make the icing and the cherry, but we don't yet know how to bake the cake." -- Yann LeCun
+
+In the previous chapter, we focused on classification methodologies, where time series data labelled with predefined categories is used to train models through supervised learning (implemented via `Aeon`). A critical aspect of this approach involved providing algorithms with direct or **transformed** time series data relative to known labels. Here we build on the idea of modelling transformed time series to discover shared patterns that bind temporal data together, in an unsupervised approach without predefined labels. 
+
+Time series clustering (TSCL) is a challenging *unsupervised* learning problem. As LeCun observes regarding unsupervised learning generally, we don't really know how to do it effectively. This is because there is an inherent uncertainty in the complexity of discovering latent structures in data (temporal or not) without explicit (labelled) guidance. Regardless, we can evaluate unsupervised learning methods, for tasks such as TSCL, by comparing the performance of unsupervised approaches on collecting labelled data together (taking the labels away) across multiple datasets. This is similar to the time series classification bake-off (see @middlehurstBakeReduxReview2024); in fact we can use the same data. Despite our lack of certainty in method, several clustering approaches have demonstrated reasonable efficacy for forecasting: distance-based, feature-based, and deep learning methods, which all leverage ideas we established in Chapter 14.    
+
+As with classification, our challenge in TSCL is in defining *similarity* for temporal data, through comparing features or series directly. Unlike 'static' data where similarity metrics can be straightforward, time series can be similar in various ways: they might have similar overall trends but different seasonal patterns, identical shapes but different magnitudes, or comparable patterns that occur at different time offsets. This is not simple, as many approaches are based on reducing data to summarised or generalised features. Whatever our approach, we need to capture the temporal dependencies and structural characteristics as best we can that make time series data unique. 
+
+Our goal is simply to group similar data; in this case specifically to help us improve model forecast accuracy. This is not a simple task, as we are often trying to understand patterns across thousands to millions of times series. Rather than modelling each series individually, clustering can find series with similar patterns, practioners, like ourselves, to develop forecasting strategies that are tailored for each group, for example grouping data can be used as embeddings (see chapter 16) for transfer learning, or creating hyperparameter sets that work for each group. 
+
+::: {.callout-caution}
+When working with data in real life we should always conduct exploratory research on the features we generate. We need to be careful to check how data transformations change our data, and how we interpret any modelling built on these transformations.
+
+It is not uncommon for practitioners to create hundreds of time series features for large datasets, and then reduce them with a dimensionality reduction algorithm like PCA or t-SNE. The problem with doing something like this is, what does 20 time series features reduced to 1 actually mean? It may help to get a sense of clusters in visualisation, but we shouldn't be overly restricted by it. And we certainly should be careful about building models with features haven't investigated. 
+:::
+
+Beyond grouping similar patterns of data, clustering has a few more advantages for us:
+
+  - It allows us to target our forecasting approach by grouping series with similar characteristics. For example, with a global forecasting model (GFM) we could use cluster labels to train a GFM on homogeneous rather than heterogeneous data. 
+  - Cluster labels may facilitate EDA in large datasets, helping us identify relationships, patterns or economic curiosities. 
+  - Clustering can also serve as an effective preprocessing step that can improve subsequent analysis performance by reducing data complexity and mitigating noise effects.
+
+If we consider practical applications, such as a retail chain trying to understand demand patterns across thousands of products and locations, they could use clustering to discover products with similar seasonal behaviours, allowing more targeted forecasting strategies for groups of data. Similarly, in energy management, clustering consumption patterns can help identify distinct customer segments, facilitating load balancing or personalised pricing strategies. 
+
+TSCL algorithms broadly fall into four categories, following the taxonomy of @paparrizosBridgingGapDecade2024. Distance-based methods, such as those using Dynamic Time Warping (DTW) or other shape-aware measures, compute pairwise distances and then apply traditional clustering algorithms like k-means or hierarchical clustering. Distribution-based methods fit probabilistic or statistical models and cluster in parameter or density space. Feature-based approaches transform time series into fixed-length vectors of descriptive statistics, enabling the use of standard clustering techniques. And there are also representation-learning methods, which use neural networks to learn latent *embeddings* that capture temporal patterns, though these models are black boxes with less interpretability than the aforementioned.
+
+This chapter will focus primarily on feature-based clustering, while briefly overviewing the other approaches. As noted by @bandaraImprovingAccuracyGlobal2021a, feature-based approaches excel where interpretability and resilience to missing and noisy data are required, which is common in production environments. Rather than attempting to capture similarity through expensive point-by-point comparisons, feature methods extract global characteristics like trend, seasonality, autocorrelation structure, and statistical distributions amongst others. Another common necessity is speed and scalability. As we saw in Chapter 14, many of the underlying methods to create and compare time series representations (e.g. shapelets) simply don't scale well. 
+
+We'll pay some attention to preprocessing techniques that commonly affect clustering performance (as a function of forecasting accuracy), including denoising methods and dimensionality reduction strategies. This emphasis on featurisation allows us to focus on experimentation, albeit simplified here for brevity.
+
+In this chapter we will cover:
+
+* Preprocessing for time series clustering
+* Feature extraction for time series clustering
+* Distance-based, distribution-based, and subsequence-based clustering approaches  
+* Deep learning clustering techniques
+* Dimensionality reduction and denoising strategies
+* Clustering evaluation and validation
+* A practical pipeline applying clustering to global forecasting models
+
+## What is clustering?
+
+*Don't fix what is not broken*, as the saying goes. Before discussing time series clustering, let's briefly overview clustering in general with the Iris dataset. Feel free to skip to the next section if you already have a good understanding. 
+
+The Iris datasets holds measurements from three species of Iris: Setosa, Virginica, and Versicolor. It contains 150 observations of flowers with four features (measurements) for each, of the length and width of each flowers sepals and petals. Sepals are leaf-like structures that are usually green and protect the flower bud during its development, while petals are the vibrant, softer structures that draw the attention of pollinators such as insects and birds. We can load this data with `sklearn`.
+```{python}
+#| label: tbl-iris-load
+#| tbl-cap: "Table 15.1: First three rows of the Iris dataset with the four measurement columns and species label."
+#| message: false
+#| echo: true
+#| eval: true
+
+from sklearn import datasets
+
+iris = datasets.load_iris()
+df = pd.DataFrame(iris.data, columns=iris.feature_names)
+df['species'] = [iris.target_names[i] for i in iris.target]
+
+display_html_table(df, n_rows=3, cols=6)
+```
+
+Let's quickly look at the data with a pairplot (distribution and scatter plots), to see the relationships in the data that make Iris easy to model. 
+```{python}
+#| label: fig-iris-pairplot
+#| fig-cap: "Figure 15.1: Pairplot of the four Iris measurements coloured by species, showing *setosa* as linearly separable and some overlap between *versicolor* and *virginica*."
+#| message: false
+#| echo: false
+#| eval: true
+
+column_list2 = [
+    'sepal length (cm)',
+    'sepal width (cm)',
+    'petal length (cm)',
+    'petal width (cm)'
+]
+
+with sns.axes_style("white"):
+    eda1 = sns.pairplot(
+        df,
+        hue="species",          
+        diag_kind="kde",
+        palette=palette,
+        markers=["o", "s", "D"],
+        vars=column_list2,
+        height=2                
+    )
+
+handles, labels = eda1._legend_data.values(), eda1._legend_data.keys()
+eda1._legend.remove()
+eda1.fig.legend(
+    handles=handles,
+    labels=labels,
+    loc="upper center",
+    ncol=3,
+    bbox_to_anchor=(0.45, 1.03)
+)
+plt.tight_layout()
+plt.show()
+```
+
+You can see across the four variables that the different species are separable. Iris setosa in particular can be easily identified since it is completely linearly separated, as seen in the scatter plots. The difficulty comes in distinguishing the overlap between versicolor and virginica, especially with the sepal measurements. 
+
+If we create boxplots, we can see that petal length and width provide slightly better separation.
+```{python}
+#| label: fig-iris-boxplot
+#| fig-cap: "Figure 15.2: Boxplots of the four Iris measurements by species, showing that petal length and width separate the three species more cleanly than the sepal measurements."
+#| message: false
+#| echo: false
+#| eval: true
+
+melted = pd.melt(
+    df,
+    id_vars="species",
+    value_vars=column_list2,
+    var_name="variable",
+    value_name="value"
+)
+
+plt.figure(figsize=(8, 4))
+dodge_amount = 2  
+box_width    = 0.8   
+
+ax = sns.boxplot(
+    x="variable", y="value", hue="species", data=melted, palette=palette,
+    width=box_width, dodge=dodge_amount, linewidth=0.8, fliersize=0, 
+)
+
+sns.swarmplot(
+    x="variable", y="value", hue="species", data=melted, palette=palette,
+    size=2, dodge=dodge_amount, edgecolor="w", linewidth=0.15, alpha=0.7,
+    legend=False, 
+)
+
+ax.set_xlabel("")
+ax.set_ylabel("Measurement (cm)", fontsize=12, fontweight="bold")
+ax.tick_params(axis="x", labelsize=12, rotation=15)
+ax.tick_params(axis="y", labelsize=12)
+
+leg = ax.legend(title="", loc="upper right", fontsize=14, frameon=False)
+ax.grid(axis="y", linestyle=":", linewidth=0.5, alpha=0.5)
+plt.tight_layout()
+plt.show()
+```
+
+Clearly the magnitudes are slightly different for each metric, so we would hope that when we use all four features together they'd create a signal that is unique to each group. There is a statistical method for checking if data is suitable for clustering called the *Hopkins statistic*, it measures the degree to which clusters exist in our data. It does this by comparing the distances of randomly generated points within the feature space to the distances of actual data points to their nearest neighbours. A Hopkins statistic close to 1 indicates high clustering tendency, while values around 0.5 suggest randomness or uniform distribution. Values between 0.7 and 0.99 indicate the dataset has a high tendency to form meaningful clusters.
+
+::: {.callout-note}
+## Hopkins definition
+
+Hopkins statistic is defined as $H = \frac{\sum_{i=1}^{m} u_i}{\sum_{i=1}^{m} u_i + \sum_{i=1}^{m} w_i}$, where $u_i$ are the nearest-neighbour distances from $m$ uniformly sampled points to the real data, and $w_i$ are  nearest-neighbour distances from $m$ randomly selected real points to their nearest real neighbours. 
+
+Our implementation uses raw distances without the dimensionality power $d$, which is a simplified form sometimes called 'non-dimensional' or 'Lawson-Jurs' variant. Typically you'd want to use a dimensional form. 
+:::
+
+Hypotheses tested by Hopkins statistic:
+
+* $H_0$ -- Dataset is uniformly distributed (no meaningful clusters).
+* $H_1$ -- Dataset is not uniformly distributed (contains meaningful clusters).
+
+We reject $H_0$ when Hopkins statistic is significantly above 0.5 (typically $H > 0.7$), indicating clusterable structure in the data.
+
+Below we have implemented a version of this with `sklearn`. 
+```{python}
+#| label: hopkins-analysis
+#| message: false
+#| echo: true
+#| eval: true
+
+from sklearn.neighbors import NearestNeighbors
+
+def hopkins(X, frac=0.1, random_state=None):
+    rng = np.random.default_rng(random_state)
+    n, d = X.shape
+    m = int(frac * n)
+    nbrs = NearestNeighbors(n_neighbors=2).fit(X)
+
+    real_idx = rng.choice(n, m, replace=False)
+    real = X[real_idx]
+
+    mins, maxs = X.min(axis=0), X.max(axis=0)
+    uniform = rng.uniform(mins, maxs, size=(m, d))
+
+    u_dist = nbrs.kneighbors(uniform, return_distance=True)[0][:, 1]
+    w_dist = nbrs.kneighbors(real,    return_distance=True)[0][:, 1]
+
+    return u_dist.sum() / (u_dist.sum() + w_dist.sum())
+
+
+X = df[['sepal length (cm)', 'sepal width (cm)', 'petal length (cm)', 'petal width (cm)']].values
+
+h2 = hopkins(X, frac=0.1, random_state=43526)
+print(f"Hopkins (fast): {h2:.4f}")
+```
+
+With a result of 0.896 we clearly have data with a high tendency for clustering. Obviously we already know this, as we already know how many clusters to use, but if we didn't we'd have to guess. There are methods for this such as elbow plots, which visualise how a clustering quality metric changes as we increase the number of clusters ($k$) and look for the point where adding more clusters yields diminishing returns. To save us time we can use the `yellowbrick` library to build the plots (see chapter 15 notebook). We'll build 9 sets of clusters ($k$=2--10) with k-means clustering (we'll discuss clustering algorithms later), and measure the results with two elbow methods.  
+```{python}
+#| label: elbow-plotting-function
+#| message: false
+#| echo: false
+#| eval: true
+
+from sklearn.cluster import KMeans
+from sklearn.metrics import calinski_harabasz_score
+from yellowbrick.cluster import KElbowVisualizer
+
+def kmeans_elbow(
+    X,
+    palette,
+    k_distortion=(1, 11),
+    k_ch=(2, 8),
+    figsize=(12, 5),
+    title_fontsize=16,
+    label_fontsize=9,
+    color_grid="lightgray"
+):
+    """
+    Display two K-Means elbow plots: distortion and Calinski-Harabasz.
+
+    Parameters
+    ----------
+    X : array-like, shape (n_samples, n_features)
+        Feature matrix.
+    palette : list of colors
+        Seaborn palette for the elbow plots.
+    k_distortion : tuple (min_k, max_k)
+        Range of K to search for distortion elbow.
+    k_ch : tuple (min_k, max_k)
+        Range of K to search for Calinski-Harabasz elbow.
+    """
+    sns.set_palette(palette)
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=figsize)
+
+    model = KMeans(random_state=4)
+
+    viz1 = KElbowVisualizer(
+        model,
+        k=k_distortion,
+        ax=ax1,
+        metric="distortion",
+        timings=False
+    )
+    viz1.fit(X)
+    viz1.finalize()
+    ax1.set_title("Distortion Elbow", fontsize=label_fontsize, fontweight="bold")
+    ax1.set_xlabel("K", fontsize=label_fontsize)
+    ax1.set_ylabel("Distortion", fontsize=label_fontsize)
+    ax1.grid(axis="y", linestyle=":", color=color_grid, alpha=0.7)
+
+    viz2 = KElbowVisualizer(
+        model,
+        k=k_ch,
+        metric="calinski_harabasz",
+        ax=ax2,
+        timings=False
+    )
+    viz2.fit(X)
+    viz2.finalize()
+    ax2.set_title("Calinski-Harabasz Elbow", fontsize=label_fontsize, fontweight="bold")
+    ax2.set_xlabel("K", fontsize=label_fontsize)
+    ax2.set_ylabel("Calinski-Harabasz Score", fontsize=label_fontsize)
+    ax2.grid(axis="y", linestyle=":", color=color_grid, alpha=0.7)
+
+    fig.suptitle("K-Means Elbow Analysis",
+                 fontsize=title_fontsize, fontweight="bold", y=1.02)
+    plt.tight_layout()
+    plt.show()
+```
+```{python}
+#| label: fig-iris-elbow
+#| fig-cap: "Figure 15.3: K-means elbow analysis on the Iris dataset showing distortion and Calinski-Harabasz scores across values of $k$, both indicating $k = 3$."
+#| message: false
+#| echo: false
+#| eval: true
+
+kmeans_elbow(
+    X=X,
+    palette=palette
+)
+```
+
+Unsurprisingly, both plots select $k = 3$. So let's build our $k$=3 clusters and see how well we do. We'll use sklearn's `kmeans` for the clustering with the elkan algorithm and `k-mean++` initalisation to create our cluster groups. Then we create a 2-dimensional representation of the data by reducing the dimensions down with t-SNE (`TSNE`), using the `barnes_hut` method, so we can plot the groups on a 2D space as a scatterplot.  
+```{python}
+#| label: iris-cluster-visuals-function
+#| message: false
+#| echo: false
+#| eval: true
+
+from yellowbrick.cluster import SilhouetteVisualizer
+
+def kmeans_cluster_visuals(X, kmeans, y_kmeans, cluster_colors, font_main, font_alt, color_grid, color_line, scatter_color_edge):
+    """
+    Generate K-Means clustering diagnostics: silhouette plot, cluster scatter, waffle chart.
+    """
+    fig, axes = plt.subplots(2, 2, figsize=(12, 9), gridspec_kw={'height_ratios': [1, 1.1]})
+    ax1, ax2 = axes[0]
+    ax3 = plt.subplot2grid((2,2), (1,0), colspan=2)
+
+    s_viz = SilhouetteVisualizer(kmeans, ax=ax1, colors=cluster_colors)
+    s_viz.fit(X)
+    s_viz.finalize()
+    ax1.set_title('Silhouette Plot of Clusters', fontsize=13, fontweight='bold', fontname=font_main)
+    ax1.set_xlabel('Coefficient Values', fontsize=9, fontweight='bold', fontname=font_main)
+    ax1.set_ylabel('Cluster Labels', fontsize=9, fontweight='bold', fontname=font_main)
+    ax1.tick_params(labelsize=8)
+    ax1.grid(axis='x', alpha=0.5, color=color_grid, linestyle='dotted')
+    for spine in ax1.spines.values(): spine.set_color('None')
+
+    for i, color in enumerate(cluster_colors):
+        ax2.scatter(X[y_kmeans == i, 0], X[y_kmeans == i, 1], 
+                    s=36, c=[color], label=f"Cluster {i+1}", linewidth=0.65, edgecolor=scatter_color_edge, alpha=0.9)
+    ax2.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1],
+                s=70, c='#42A2FC', marker='X', label='Centroids', linewidth=0.8, edgecolor='black', alpha=1)
+    ax2.set_title('Cluster Distribution (PCA projection)', fontsize=13, fontweight='bold', fontname=font_main)
+    ax2.grid(alpha=0.5, color=color_grid, linestyle='dotted')
+    ax2.set_xlabel('PC1', fontsize=9, fontweight='bold', fontname=font_main)
+    ax2.set_ylabel('PC2', fontsize=9, fontweight='bold', fontname=font_main)
+    ax2.legend(loc='upper right', fontsize=8, frameon=False)
+    ax2.tick_params(axis="both", labelsize=8)
+    for spine in ax2.spines.values(): spine.set_color(color_line)
+
+    unique, counts = np.unique(y_kmeans, return_counts=True)
+    df_waffle = dict(zip(unique, counts))
+    labels = ["Virginica", "Versicolor", "Setosa"]
+    label_map = dict(zip(sorted(df_waffle.keys()), labels))
+    values = [df_waffle[i] for i in sorted(df_waffle.keys())]
+    value_labels = [f"{label_map[i]} - {round(100*v/sum(values),1)}%" for i, v in zip(sorted(df_waffle.keys()), values)]
+    Waffle.make_waffle(ax=ax3, rows=6, values=values, colors=cluster_colors, labels=value_labels,
+                       legend={'loc':'upper center', 'bbox_to_anchor':(0.5, -0.15), 'ncol': 3, 'borderpad': 2, 'frameon': False, 'fontsize':10})
+    ax3.set_title('Cluster Membership Percentage', fontsize=13, fontweight='bold', fontname=font_main)
+
+    plt.suptitle('Iris Clustering using K-Means', fontsize=15, fontweight='bold', fontname=font_main)
+    plt.gcf().text(0.9, 0.03, 'kaggle.com/caesarmario', style='italic', fontsize=7, fontname=font_alt)
+    plt.tight_layout(rect=[0, 0, 1, 0.97])
+    plt.show()
+```
+```{python}
+#| label: iris-clustering-tsne
+#| message: false
+#| echo: true
+#| eval: true
+
+from sklearn.cluster import KMeans
+from sklearn.manifold import TSNE
+
+kmeans = KMeans(
+  n_clusters=3, 
+  init='k-means++', 
+  n_init='auto',
+  max_iter=300,
+  algorithm='elkan',
+  random_state=5363)
+y_kmeans = kmeans.fit_predict(X)
+
+df['cluster'] = y_kmeans
+
+tsne = TSNE(
+        n_components=2, 
+        perplexity=50, 
+        n_iter=1200, 
+        random_state=4126, 
+        method='barnes_hut',
+        init="pca",
+        n_jobs=-1
+    )
+
+X_tsne = tsne.fit_transform(X)
+```
+```{python}
+#| label: silhouette-tsne-function
+#| message: false
+#| echo: false
+#| eval: true
+
+from yellowbrick.cluster import SilhouetteVisualizer
+
+def plot_silhouette_tsne(X, X_tsne, y_kmeans, kmeans, palette, labels=None, figsize=(12,5), s=36):
+    """
+    Plots silhouette and t-SNE scatter together.
+
+    Parameters
+    ----------
+    X : ndarray, original data used for clustering (n_samples, n_features)
+    X_tsne : ndarray, t-SNE embedding (n_samples, 2)
+    y_kmeans : ndarray, cluster labels (n_samples,)
+    kmeans : fitted KMeans object
+    palette : list, colour palette for clusters
+    labels : list or None, custom cluster names (optional)
+    figsize : tuple, figure size
+    s : int, marker size for scatter
+    """
+    sns.set_palette(palette)
+    n_clusters = kmeans.n_clusters
+    if labels is None:
+        labels = [f"Cluster {i+1}" for i in range(n_clusters)]
+    
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=figsize)
+    
+    s_viz = SilhouetteVisualizer(kmeans, ax=ax1, colors=palette)
+    s_viz.fit(X)
+    s_viz.finalize()
+    ax1.set_title('Silhouette Plot', fontsize=12, fontweight='bold')
+    ax1.set_xlabel('Silhouette Coefficient', fontsize=14)
+    ax1.set_ylabel('Cluster', fontsize=14)
+    ax1.tick_params(labelsize=8)
+    ax1.grid(axis='x', linestyle=':', linewidth=0.5, color='lightgray', alpha=0.7)
+    for spine in ax1.spines.values():
+        spine.set_color('None')
+
+    for i in range(n_clusters):
+        ax2.scatter(
+            X_tsne[y_kmeans == i, 0], X_tsne[y_kmeans == i, 1],
+            s=s, color=palette[i], label=labels[i], alpha=0.85, edgecolor="w", linewidth=0.5
+        )
+
+    ax2.set_title('t-SNE Cluster Visualisation', fontsize=14, fontweight='bold')
+    ax2.set_xlabel('t-SNE 1', fontsize=14)
+    ax2.set_ylabel('t-SNE 2', fontsize=14)
+    ax2.grid(linestyle=':', linewidth=0.5, color='lightgray', alpha=0.7)
+    ax2.legend(fontsize=14, frameon=False, loc='best')
+    ax2.tick_params(labelsize=14)
+
+    plt.suptitle('K-Means: Silhouette and t-SNE Plots', fontsize=14, fontweight='bold')
+    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    plt.show()
+```
+
+Now let's plot this out clusters .
+
+```{python}
+#| label: fig-iris-silhouette-tsne
+#| fig-cap: "Figure 15.4: Silhouette plot and t-SNE projection of the $k = 3$ k-means clusters on the Iris dataset, with cluster labels mapped to species names."
+#| message: false
+#| echo: false
+#| eval: true
+
+plot_silhouette_tsne(X, X_tsne, y_kmeans, kmeans, palette=palette, labels=['Virginica', 'Versicolor', 'Setosa'])
+```
+
+The clusters look reasonably good, but how good are they? Well, let's check them out by comparing the true labels to the cluster labels (arbitrary values, which change each run unless the seed is controlled). Because Iris is easy to cluster, we can use the Hungarian algorithm, which solves the **assignment problem** by finding the minimum cost to assign $n$ workers (cluster labels) to $n$ tasks (species).
+
+Given a cost matrix $C$ where $C_{ij}$ represents the cost of assigning worker $i$ to task $j$, we want to find a permutation $\pi$ that minimises:
+
+$$
+\sum_{i=1}^{n} C_{i,\pi(i)}
+$$
+
+There are five steps for this algorithm
+
+1. Row reduction: subtract minimum value in each row from all elements in that row: $C'_{ij} = C_{ij} - \min_k C_{ik}$
+
+2. Column reduction: subtract minimum value in each column from all elements in that column: $C''_{ij} = C'_{ij} - \min_k C'_{kj}$
+
+3. Cover all zeros: find minimum number of horizontal and vertical lines needed to cover all zeros in the matrix.
+
+4. Optimality test: if number of lines equals $n$, we have an optimal solution. If not, proceed to step 5.
+
+5. Matrix adjustment: find smallest uncovered element $\delta$, subtract $\delta$ from all uncovered elements, add $\delta$ to elements covered by two lines, and return to step 3.
+
+We then create a **benefit matrix** from this confusion matrix and convert it to a cost matrix:
+
+$$
+\text{Cost}_{ij} = \max(\text{Confusion Matrix}) - \text{Confusion Matrix}_{ij}
+$$
+
+We can apply this with `sklearn` and `scipy` using a crosstab with a linear sum assignment.
+```{python}
+#| label: iris-cluster-assignment
+#| message: false
+#| echo: true
+#| eval: true
+
+print(df.groupby(['species', 'cluster']).size().unstack(fill_value=0))
+
+from sklearn.metrics import accuracy_score
+from scipy.optimize import linear_sum_assignment
+
+confusion_matrix = pd.crosstab(df['species'], df['cluster'])
+print("\nConfusion Matrix:")
+print(confusion_matrix)
+
+cost_matrix = confusion_matrix.max().max() - confusion_matrix
+row_indices, col_indices = linear_sum_assignment(cost_matrix)
+
+total_correct = confusion_matrix.values[row_indices, col_indices].sum()
+accuracy = total_correct / len(df)
+print(f"\nClustering Accuracy: {accuracy:.3f}")
+```
+
+According to this, a clustering accuracy of 89.3% is great! Or is it? Well, you can definitely do better, as we haven't covered preprocessing, denoising, dimensionality reduction and/or different clustering methods yet. But the lesson here is what the Iris dataset shows us about how well clustering, cluster evaluation metrics and simple methods work with neat spherical clouds in 4-dimensional feature space. In higher-dimensional (i.e. featurised time series) space, we often require additional preprocessing and careful metric interpretation. Cluster evaluation metrics can be about as useful as a chocolate teapot with larger and more complex data.
+
+### Preprocessing for time series clustering
+
+For time series clustering how we preprocess data often matters as much as our clustering approach. This is especially true for time series data that include trends, seasonality, differing scales, noise, varying lengths and so on. These can mislead clustering if left unhandled. Conversely, we need to be careful in transforming our data *before* we run clustering, as our choices can embed assumptions in our data and resulting clusters.
+
+For example, **scaling** each series to a common range or distribution is usually a first step. If one series' values range in the thousands and another in the tens, k-means (and many distance metrics) will treat them as far apart even if their general **patterns** over time are similar. By applying something like z-score standardisation (so each series has mean 0 and variance 1) or min-max normalisation (scaling values between 0 and 1), we ensure that **magnitude** differences don't overpower shape similarities. This way, a series selling 1000 units a day could potentially cluster with one selling 10 units a day if their trends and seasonal patterns align. Equally, you should question if this is a good thing or not! 
+
+We also consider **detrending and deseasonalising** time series, though some representation systems can handle these internally. Clustering might group series just because they all share an upward trend, even if everything else differs. If a long-term trend or strong seasonal pattern isn't what we want defining our clusters, we can remove it (for instance, subtracting a moving average trend or using seasonal decomposition to isolate residuals). The idea is to highlight the features we *do* care about, perhaps short-term fluctuations or overall shape, by removing structural components that could dominate the distance calculations.
+
+Another common preprocessing step is **noise reduction**. Time series data can be noisy (random spikes or drops). Smoothing techniques like moving averages or more sophisticated filters (e.g. a Savitzky-Golay filter) can help suppress these random fluctuations. Reducing noise may help us, but it can also erase meaningful patterns. A lightly smoothed series might cluster more reliably by focusing on the major pattern instead of tiny jitters.
+
+**Length differences** and their alignment are another key factor for TSCL. If series are of unequal lengths, distance measures might perform poorly, or clustering may focus on length rather than pattern. We might truncate longer series or pad shorter ones (with zeros or by repeating the last value) to create a common length. In this chapter we focus on feature-based approaches where length can be a feature of our data. Typically we want to ensure we're not clustering purely based on one series being longer or starting later than another.
+
+In short, good preprocessing can improve clustering. But there's no perfect approach; the 'right' preprocessing depends on our domain knowledge and what we define as similarity. Experimenting with different preprocessing combinations is always worthwhile for unsupervised learning. 
+
+
+### Defining time series clustering
+
+At this point its worth defining time series clustering (TSCL). There are three main branches:
+
+* **Whole-series** -- Aims to cluster entire series based on information about each series, or group of series (multivariate).
+* **Subsequence** -- Clustering subsequences extracted from series using sliding windows.
+* **Time point** -- Point-based clustering of individual time steps.  
+
+Whole-series is our focus here, with our intent being to improve modelling performance rather than finding specific patterns or points. This can be further split into subsequence-based and entire-series-based approaches (see Figure 15.5).
+
+![Figure 15.5: Whole time series clustering: subsequence-based vs entire-series-based](images/chap15_images/whole_time_series_splitting.png){#fig-whole-ts-splitting fig-align="center" fig-alt="Diagram showing the distinction between subsequence-based and entire-series-based whole time series clustering"}
+
+Subsequence whole-series clustering is useful for multivariate data like EEG output, but while it is an interesting concept to experiment with there are some questions over its utility in areas like ours (forecasting). Unfortunately it's beyond scope here, but it is certainly worth investigating when looking for pattern changes. Anyhow, onwards! 
+
+## TSCL pipeline
+
+TSCL follows a general pipeline with three stages: representation building, dissimilarity measurement, and clustering.
+
+![Figure 15.6: Clustering Pipeline: Representation to Dissimilarity to Clustering](images/chap15_images/tscl-pipeline.png){#fig-tscl-pipeline fig-align="center" fig-alt="General pipeline phases of TSCL exacxt process varies by method"}
+
+  1. **Representation** is a featurisation stage. Given a raw time series $\mathbf{x}_i = \{x_{i1}, x_{i2}, \ldots, x_{iT}\}$, we transform it using some mapping $\phi : \mathbb{R}^T \rightarrow \mathbb{R}^K$ (where $K < T$) to get a representation $\mathbf{x}'_i = \{x'_{i1}, \ldots, x'_{iK}\}$ of the series in a new feature space. Our aim here is capturing the meaningful parts of our series while ditching the noise. If $\mathbf{x}_i$ is similar to $\mathbf{y}_i$, then $\phi(\mathbf{x}_i)$ should be similar to $\phi(\mathbf{y}_i)$, and vice versa. Representations split into two categories: *numeric* methods that use real-valued arrays or matrices with reduced dimensions (DFT, DWT, neural embeddings), and *symbolic* approaches that discretise data into symbols, enabling text-based techniques like hashing and sequence matching (SFA, SAX).
+
+  2. **Dissimilarity** is where we measure distance, comparing how different our transformed series are. It's important that whatever measure we use produces small values for similar representations and large values for dissimilar ones. A few broad categories of dissimilarity measure, which we met in Chapter 14:
+    * **Lock-step** -- one-to-one point correspondence measures, like p-norms and their variants, along with Jaccard (set similarity rather than vector norm).  
+    * **Elastic** -- where we compare time points in one-to-many form, typically used when one-to-one mapping isn't informative, e.g. DTW. 
+    * **Sliding** -- these slide one entire time series along another to find the position where they match best overall, e.g. Shape-Based Distance (SBD).   
+    
+  3. **Clustering algorithm** -- is our final stage, where we take our representation distances and cluster the data with one of many clustering algorithms.
+
+
+## Clustering approaches 
+
+In reality TSCL approaches are pipelines, built around distance, distribution, subsequence, or representation methods. There is some overlap and confusion in terminology too, as distance-based approaches refer to direct application of dissimilarity measures, while representation-based TSCL refers to representation learning, a deep-learning approach to building representations. It is not an exaggeration to say that, regardless of approach, preprocessing is the key to success.   
+
+### Distance-based  
+
+Distance-centric TSCL treats clustering as a geometric partition under a user-defined metric $D(\mathbf{x},\mathbf{y})$.
+
+* **Lock-step metrics** (e.g. Euclidean distance) assume exact phase alignment: $D_{\text{ED}}(\mathbf{x},\mathbf{y})=\sqrt{\sum_{t=1}^{T}(x_t-y_t)^2}$.
+* **Elastic metrics** such as Dynamic Time Warping (DTW) allow flexible alignment to handle phase and rate distortions: $\operatorname{DTW}(\mathbf{x},\mathbf{y})=\min_{\pi}\sum_{(i,j)\in\pi}d(x_i,y_j)$. These extend to LCSS (Longest Common Subsequence) and MSM (Move-Split-Merge), at $O(T^2)$ cost per comparison.
+* **Sliding metrics** such as Shape-Based Distance (SBD) use FFT to achieve $O(T\log T)$ alignment under circular shifts.
+
+With a distance matrix in hand, we apply either **partitional** algorithms (k-means, k-medoids, k-Shape with spectral centroid update) or **hierarchical** linkages (single, complete, Ward) to build a dendrogram. There are advantages to this, such as transparent geometry and metric modularity. However, the pairwise cost grows $O(N^2)$ with dataset size, and this approach is highly sensitive to noise in our sequences. We also have the additional problem of length differences between series. As with classification, distance-based methods show mediocre performance at scale. 
+
+![Figure 15.7: Distance-based clustering: lock-step metrics like Euclidean compare points one-to-one, while elastic metrics like DTW allow flexible alignment.](images/chap15_images/tscl_distance_based.png){#fig-tscl-distance fig-align="center" fig-alt="Three panels showing Euclidean point-by-point alignment, DTW elastic alignment with warping path, and the resulting distance matrix"}
+
+### Distribution-based  
+
+Distribution approaches encode series through **probabilistic or statistical distributions** rather than raw geometry. There are four subcategories here:  
+
+1. **Model-based** methods fit statistical or probabilistic models like Gaussian Mixture Models (GMM), Hidden Markov Models (HMM), ARIMA or Gaussian-process priors, and then cluster in parameter space via likelihood or selection criteria such as the Bayesian Information Criterion (BIC).
+2. **Density-based** methods such as DBSCAN, OPTICS, and DPC identify connected dense regions in $\mathbb{R}^d$ after kernel density estimation: $\hat{f}(\mathbf{x})=\frac{1}{Nh^d}\sum_{i=1}^N K\!\left(\frac{\mathbf{x}-\mathbf{x}_i}{h}\right)$.
+3. **Feature-based** methods extract global and subsequence statistics through featurisation libraries such as tsfeatures, tsfresh, or catch22. These features form a fixed-length vector, to which we apply standard vector clustering.
+4. **Encoding-based** methods use symbolic transforms (SAX, iSAX, SFA) or learned embeddings, clustering series in the resulting latent manifold.
+
+To some extent, these approaches handle noise and variable length naturally, yet they demand careful model or threshold selection. They can also be fast and provide us with an additional dimension for exploratory analysis. 
+
+![Figure 15.8: Distribution-based clustering: model-based approaches fit probability distributions, density-based approaches find connected dense regions, and both rest on kernel density estimation of the underlying feature distribution.](images/chap15_images/tscl_distribution_based.png){#fig-tscl-distribution fig-align="center" fig-alt="Three panels: GMM with concentric ellipses around two clusters, DBSCAN with irregular dense regions and noise points, and a bimodal kernel density curve"}
+
+### Subsequence-based  
+
+The idea of subsequence-based approaches is to represent each series with localised motifs rather than entire traces.
+
+* **Sliding-window techniques** tile sequences into overlapping windows, cluster those windows (often via DTW or SBD), then aggregate the window clusters to series-level assignments.
+* **Shapelet-based techniques** search or learn discriminative subsequences; every series is re-encoded by its distances to $k$ shapelets, yielding a $k$-dimensional feature vector for downstream clustering.  
+
+As with classification, these inherit phase invariance and interpretability, which can make them excellent for grouping series. However, their limiting factor is the combinatorial search for high-quality subsequences. At scale they are expensive and slow; depending on your compute resources you may decide which to use. As a rule of thumb, I find fewer than 1,000 series of length 730 to be manageable. 
+
+![Figure 15.9: Subsequence-based clustering: sliding-window techniques tile a long series into overlapping windows for clustering, while shapelet-based techniques re-encode each series by its distance to a set of learned discriminative subsequences.](images/chap15_images/tscl_subsequence_based.png){#fig-tscl-subsequence fig-align="center" fig-alt="Top panel shows a long time series with five coloured sliding windows; bottom panel shows three series with a learned shapelet and a distance-to-shapelet table"}
+
+### Representation-learning  
+
+Deep neural encoders learn a mapping $f_\theta:\mathbb{R}^{T}\to\mathbb{R}^{d}$ that embeds sequences in a manifold $Z=f_\theta(X)$, which is subsequently clustered. In simple terms, these neural networks compress our time series data into lower-dimensional representations (not unlike built features or shapelets), making clustering easier. Two optimisation families dominate the literature:
+
+* **Comparative-based** losses learn by comparing examples. They use techniques like InfoNCE to draw or push series together in a learned space depending on similarity. 
+* **Generative-based** losses combine two objectives: reconstructing the original data (like an autoencoder trying to rebuild the input) and a clustering penalty that encourages similar series to group together: $\mathcal{L}=\mathcal{L}_{\text{rec}}+\lambda\,\mathcal{L}_{\text{cluster}}$.
+
+The reconstruction loss ($\mathcal{L}_{\text{rec}}$) ensures the model captures important information, whilst the clustering regulariser ($\mathcal{L}_{\text{cluster}}$) encourages the learned representations to form distinct groups. ELBO (Evidence Lower Bound) is a specific type of loss used in variational autoencoders that balances reconstruction accuracy with how well the learned representations follow a desired probability distribution.
+
+Architectures spanning 1D CNNs, LSTM/GRU, Transformer and graph encoders have been adapted for TSCL. Among these, CNN-based architectures generally achieve the best results for univariate time series clustering, offering $O(k \cdot n^2)$ complexity per layer where $k$ is kernel size, compared to RNNs' $O(n \cdot h^2)$ per layer where $h$ is hidden size, or Transformers' $O(n^2 \cdot d)$ per layer scaling [@paparrizosBridgingGapDecade2024]. CNNs do well in capturing local temporal patterns through weight sharing while maintaining computational efficiency, which is critical for production deployments, and they tend to perform well on high-dimensional and/or irregular data. That said, GPU cost and hyperparameter sensitivity are not insignificant factors in their utility.
+
+![Figure 15.10: Representation-learning clustering: a neural encoder learns a non-linear mapping from raw series to a low-dimensional manifold where similar series cluster naturally and standard algorithms can take over.](images/chap15_images/tscl_representation_learning.png){#fig-tscl-representation fig-align="center" fig-alt="Three panels: raw time series on the left, a funnel-shaped neural encoder in the middle, and a low-dimensional embedding space with three clusters on the right"}
+
+## Deep-learning approaches to TSCL  
+
+There are two general strategies for deep-learning TSCL: two-stage pipelines that separate encoding from clustering, and end-to-end frameworks that learn both simultaneously.
+
+### Two-stage pipeline
+
+Two-stage pipelines often perform well, achieving good results with a straightforward process. It is the more popular strategy in literature at time of writing, with methods like TS2Vec and TNC being more commonly implemented [@paparrizosBridgingGapDecade2024]. General apporach is as follows...
+
+1. Use an unsupervised encoder such as an autoencoder (which learns to compress and reconstruct data), a VAE (adds probabilistic constraints), or a contrastive CNN to transform our series into compact representations $Z=\{z_i\}$. These encoders find 'meaningful' patterns by minimising reconstruction errors or contrastive losses.
+
+2. Apply standard clustering algorithms like k-means or DBSCAN to these learned representations $Z$. Even with a simple k-means clustering we can achieve excellent results when with this apporach so long as the encoder has learned good representations that capture multi-scale temporal patterns and structural relationships in the data.
+
+![Figure 15.11: Two-stage pipeline: the encoder is trained once on a self-supervised reconstruction or contrastive objective, then its embeddings are frozen and any standard clustering algorithm is applied.](images/chap15_images/tscl_two_stage_pipeline.png){#fig-tscl-two-stage fig-align="center" fig-alt="Stage 1 shows an encoder-decoder autoencoder reconstructing input series; stage 2 shows the frozen embeddings being passed to k-means and producing cluster assignments"}
+
+
+### End-to-end neural clustering
+
+Frameworks such as DEC, Deep k-Means (CKM), VaDE and ClusterGAN integrate representation and clustering objectives into a single jointly trained system. While these joint approaches can produce tighter cluster boundaries, they introduce complexity through additional hyperparameters and sensitivity to initialisation. As an example, the DEC loss uses a Kullback-Leibler divergence term that compares current soft cluster assignments $Q$ (confidence of each point's cluster assignment) with a sharpened target distribution $P$ (our desired cluster assignments):
+
+$$ 
+\mathcal{L}_{\text{DEC}}=\operatorname{KL}(P \| Q)=\sum_{i,k} p_{ik}\log\frac{p_{ik}}{q_{ik}}
+$$
+
+Training alternates weight updates, centroid (or mixture) refinement and pseudo-label recalculation, producing embeddings and partitions simultaneously. These one-stage methods often tighten cluster manifolds but introduce additional hyperparameters (KL weight $\lambda$, annealing schedules) and dependence on centroid initialisation, necessitating systematic experimentation to ensure convergence. Recent hybrid approaches combining reconstruction and contrastive objectives (like DTCC and TimeCLR) attempt to balance these trade-offs [@paparrizosBridgingGapDecade2024].
+
+![Figure 15.12: End-to-end neural clustering: encoder, embedding, and clustering layer are trained together against a joint loss combining reconstruction and a clustering term such as DEC's KL divergence; gradients update encoder weights and centroids simultaneously.](images/chap15_images/tscl_end_to_end.png){#fig-tscl-end-to-end fig-align="center" fig-alt="Single jointly-trained system showing input series flowing through encoder, embedding, clustering layer, and joint loss, with a feedback arrow indicating gradients update encoder and centroids together"}
+
+## Summary of TSCL approaches
+
+What can we take from this? Distance-based methods suffer from quadratic computational complexity for hierarchical clustering and $O(N^2)$ pairwise distance calculations, whilst elastic measures like DTW compound this with $O(T^2)$ cost per comparison. Subsequence-based approaches like shapelets provide excellent interpretability and performance at the higher end of the options available, but face combinatorial search complexity that becomes prohibitive at scale. We know of no documented use of shapelets in production featurisation systems at the time of writing. Similarly, deep-learning representation methods like *R-Clustering* have shown strong performance (performing best on 33 of 112 datasets, with Agglomerative Euclidean clustering as the next best), compared to shapelets for example [@marco-blancoTimeSeriesClustering2023]. But they also require large datasets and substantial GPU resources, along with extensive hyperparameter tuning. There are cases of these being used, but only by companies with substantial compute. This doesn't mean we should discount them entirely, but in many settings they are not practical at scale, nor explainable. 
+
+Given this, feature-based clustering is the most viable approach for production settings, which we may combine with two-stage deep-learning pipelines. By transforming time series into feature vectors, we get linear computational complexity $O(T \times N)$, noise robustness, and interpretable results that can be understood and discussed in decision making, which is often crutial in decision-making. Feature-based approaches scale efficiently to large datasets, integrate well with existing pipelines, and can be easily traced and debugged in production environments.
+
+
+## Applying featurisation 
+
+We are aiming here to create a GFM with N-HITS, which performed best in our transfer learning testing on a smaller version of the M5 dataset (see Chapter 11). Our featurisation and clustering will be applied to one location (California state, location 3: CA_3) of the M5 dataset, which contains 3,038 time series of item sales with pricing data. We focus on a single location to keep computation manageable and the results interpretable, applying more widely just requires location in the static covariates.
+
+Our primary pipeline extract the features, and clusters them to create labels for our data set the GFM can use:
+
+1. Data preparation
+2. Extracting features 
+3. Basic exploration 
+4. Clustering 
+5. Training GFM
+6. Evaluation
+
+### Data preparation
+
+We start by loading and formatting our date, removing short series and shifting demand/sales values to avoid infinite values in calculations. You don't have to remove short series, as the features we build can deal with less than 365 periods. Shifting values by adding 1 undermines zero counts, and metric reling on them, so if zero counts matter to your use case it would be best to handle those separately.  
+```
+df = pd.read_csv(CFG.data_folder / 'm5-forecasting-accuracy' / 'sales_train_validation.csv')
+df['timestamp'] = pd.to_datetime(df['ds'])  
+df = df.rename(columns={
+    'id': 'unique_id',  
+    'sold': 'y',
+    'sell_price': 'price'
+})
+
+df['ds'] = pd.to_datetime(df['ds'])
+df = df[['unique_id', 'ds', 'y', 'price']].copy()
+
+# Drop any series with fewer than 365 days 
+df = df.groupby('unique_id').filter(lambda x: len(x) >= 365).reset_index(drop=True)
+df['y'] = df['y'] + 1  # Shift to avoid zero values
+```
+
+After this we have a table with a unique_id, datestamp (ds), sales (y) and exogenous (price). If you are using your own data, exogenous variable/s are optional.
+
+```python
+df.head()
+```
+
+**Table 15.2:** First five rows of the M5 FOODS_1 CA_3 dataset after selecting the required columns.
+
+| unique_id | ds | y | price |
+|---|---|---:|---:|
+| FOODS_1_001_CA_3 | 2011-01-29 | 2.0 | 2.0 |
+| FOODS_1_001_CA_3 | 2011-01-30 | 3.0 | 2.0 |
+| FOODS_1_001_CA_3 | 2011-01-31 | 2.0 | 2.0 |
+| FOODS_1_001_CA_3 | 2011-02-01 | 2.0 | 2.0 |
+| FOODS_1_001_CA_3 | 2011-02-02 | 2.0 | 2.0 |
+
+Because we are building and testing models with this data, we need to split it to avoid information leakage. We use a train-test split here, but train-validation-test is a much better choice (see Chapter 3 for a discussion of evaluation strategies). 
+
+```
+h = 90  # forecast horizon
+
+cutoff_date = df['ds'].max() - pd.Timedelta(days=h)
+
+train_df = df[df['ds'] <= cutoff_date].reset_index(drop=True)
+val_df = df[df['ds'] > cutoff_date].reset_index(drop=True)
+```
+
+You'll notice we didn't split by `unique_id`. That's because all the series span at least 365 days and end on the same date, so a single cutoff date applies uniformly. Some series are shown below to help confirm the splitting. We can see this data isn't great in parts, and would certainly be improved at weekly aggregations.
+
+![Figure 15.13: Sample M5 CA_3 series with train-test split](images/chap15_images/M5_series.png){#fig-m5-series-splits fig-align="center" fig-alt="Line plots showing several M5 CA_3 time series with vertical line indicating the train-test split point"}
+
+### Feature extraction
+
+We're now in a position to create our time series features. This can be the easy bit, depending on what features we want. You select a library such as the reduced `hctsa` library `catch22`, or one of the many others: `tsfresh`, `tsfel`, `tslearn` and so on. Choosing which to use relies on your investigations and experimentation, and on how your data is preprocessed. For example, the flat spots in the series images above and the noise adversely affect the building of some features, which may lead you to aggregating and/or imputing data. Regardless, we are going to simply apply Nixtla's [tsfeatures](https://github.com/Nixtla/tsfeatures), which is a Python implementation of an [R package](https://htmlpreview.github.io/?https://github.com/robjhyndman/M4metalearning/blob/master/docs/M4_methodology.html) with the same name by Montero-Manso, Talagala, Hyndman and Athanasopoulos. 
+
+At this point we are not directly scaling or applying other preprocessing, so feel free to follow along with your own data. If you have sparse or missing data and have not done your wrangling, you may encounter issues like infinite values; you can either deal with these or leave them in. Sometimes it's best to do nothing and remove the problematic features afterwards. `tsfeatures` builds 22 types of features very quickly (Nixtla version), and does a reasonable job of clustering data as seen in earlier M-competitions. 
+
+As with most featurisation libraries there are different ways to apply `tsfeatures`. Below we import each feature type separately so that we can control the features we build with a list, rather than letting `tsfeatures` build all features. We pass this list to the `tsfeatures` method, along with the frequencies of the data we want to consider (weekly and yearly), and apply it to `train_df`. 
+```
+from tsfeatures import (
+    acf_features, heterogeneity, series_length, arch_stat, holt_parameters, sparsity,
+    count_entropy, hurst, stability, crossing_points, hw_parameters, stl_features,
+    entropy, intervals, unitroot_kpss, flat_spots, lumpiness, unitroot_pp,
+    frequency, nonlinearity, guerrero, pacf_features
+)
+
+default_feats = [
+    acf_features, heterogeneity, series_length, arch_stat, holt_parameters, sparsity, 
+    count_entropy, hurst, stability, crossing_points, hw_parameters, stl_features,
+    entropy, intervals, unitroot_kpss, flat_spots, lumpiness, unitroot_pp,
+    frequency, nonlinearity, guerrero, pacf_features
+]
+
+feature_df = tsfeatures(
+    train_df, 
+    dict_freqs={'D': 7, 'W': 52}, 
+    features=default_feats
+)
+```
+
+The output is a pandas DataFrame with a row for each series (unique_id; $n$ = 3,038) and the featurised summaries ($p$ = 49 columns).  
+
+```python
+feature_df.head(3)
+```
+
+**Table 15.3:** Representative sample of extracted tsfeatures for the first three M5 CA_3 series. Six columns are shown from the full set of 49; each is drawn from a different feature family (autocorrelation, seasonality, nonlinearity, heteroscedasticity, stationarity, and distributional transformation).
+
+| unique_id | x_acf1 | seas_pacf | nonlinearity | lumpiness | unitroot_pp | guerrero |
+|---|---:|---:|---:|---:|---:|---:|
+| FOODS_1_001_CA_3 | 0.0784 | 0.0886 | 0.0804 | 0.0430 | -1934.51 | 0.0887 |
+| FOODS_1_002_CA_3 | 0.0617 | 0.0795 | -0.0874 | 0.0580 | -2043.27 | 0.0378 |
+| FOODS_1_003_CA_3 | 0.0773 | 0.0383 | 0.0158 | 0.0544 | -1916.87 | 0.1388 |
+
+We have some features, like `arch_acf`, which have NaN values. Looking at the extent of this problem with `print(feature_df.isna().sum())` we found a lot of time series with NaN values in `hurst`. The option we applied earlier (adding 1 to `y`) resolved many of these rows. We could have also removed the rows (which would have defeated the point of using featurised clustering) or imputed the values (risky without extensive EDA). Afterwards some columns still had NaN values for a subset of series; this happens when data is not suited to some of the simple statistical model summaries like GARCH. The best thing to do here is remove those columns with `feature_df = feature_df.dropna(axis=1)`. In addition, some columns have no variance (i.e. a single value) so we should remove those with `feature_df = feature_df.loc[:, feature_df.nunique(dropna=False) > 1]`. There is no point in keeping single-value columns as they provide no information for clustering. This takes us from 49 to 37 columns; many of the dropped columns are autocorrelation features that were entirely NaN.     
+
+We can get some sense of what the features are doing by creating a correlation heatmap (Figure 15.14). This is a complex patchwork of features that have several relationships in the data but no clear dominant patterns (maybe with the exception of the differenced PACF features). This is a good thing: we don't want features to be too well correlated with each other, as we are essentially using them to differentiate time series based on dissimilarity.   
+
+![Figure 15.14: Feature correlation heatmap for the 37 retained tsfeatures](images/chap15_images/feature_heatmap.png){#fig-feature-heatmap fig-align="center" fig-alt="Heatmap showing pairwise correlations between the 37 retained time series features, with most correlations near zero"}
+
+We could reduce the number of features with ridge regression to select the best subset, but I tend to find this actually reduces the quality of clustering as it's based on linear relationships which many features do not comply with. A better option can be to create a classification task (after you have created clusters) using non-linear classifiers such as decision trees or SVMs. This isn't great though, as it is a kind of confirmation bias: selecting the best features for preselected clusters. This is more of a problem when you have more features than rows (curse of dimensionality). Luckily we have only 37, so we don't need to bother with feature selection or dimensionality reduction, which can be achieved best with the autoencoding we will discuss later.
+
+### Scaling
+
+At this point we simply need to scale our features so that they are on the same scale. Why? Well, as Tivadar Danka mentions in *Mathematics of Machine Learning*, if you have a feature at a higher magnitude than others it is a little like being in a room with loud music while someone is whispering to you from another room. The whisper may be more informative than the loud music, which you'd only know if they were on the same scale. 
+```
+from sklearn.preprocessing import minmax_scale
+
+feature_df_scaled = feature_df.copy()
+feature_df_scaled.iloc[:, 2:] = minmax_scale(feature_df_scaled.iloc[:, 2:])
+```
+
+Now that we have scaled our features we can get on with our clustering. Our first task is to check whether the data has clustering tendency (spoiler alert: Hopkins statistic is not always useful with large datasets, it can give us a general idea).
+```
+X = feature_df_scaled.drop(['unique_id'], axis=1).values
+
+h2 = hopkins(X, frac=0.1, random_state=562456)
+print(f"Hopkins: {h2:.4f}")
+```
+```
+Hopkins: 0.8584 
+```
+
+Seems like we have some cause for clustering, with a Hopkins of 0.858 which is well above the 0.5 threshold. 
+
+### Selecting the number of clusters
+
+We are going to use k-means here, but agglomerative clustering is a good option, as are density-based approaches like DBSCAN if you want more flexibility in your cluster shapes.  
+```
+kmeans_elbow(
+    X=X,
+    palette=custom_palette,
+    k_distortion=(1, 20),
+    k_ch=(2, 20),
+)
+```
+
+![Figure 15.15: Elbow plots for the standardised M5 CA_3 features showing distortion (left) and Calinski-Harabasz index (right)](images/chap15_images/elbow_plot_standard.png){#fig-elbow-standard fig-align="center" fig-alt="Two elbow plots side by side: distortion shows a smooth decline from k=1 to k=20; Calinski-Harabasz peaks at k=2 then declines"}
+
+Calinski-Harabasz (CH) compares the dispersion between clusters to dispersion within clusters. Conversely to distortion, a higher rather than lower CH value means clusters are dense and well-separated.
+
+There are about three patterns to look for with CH and distortion. If the CH values show a clear peak (or a valley for distortion) or an abrupt elbow, we should choose the number of clusters at that point, as it suggests an optimal balance between compactness and separation. If the CH index increases smoothly or remains flat, there is no strong evidence for a particular number of clusters, so domain knowledge and EDA on the clusters should guide the decision. If the CH index fluctuates, we look for local maxima or points where the increase slows down significantly.
+
+Regardless, the CH index here on scaled data suggests $k$=2, which is ridiculously low. CH is not a good metric for this data. With the unscaled data the CH index suggests 4 or 6, and seems to work better, but the clusters are terrible for modelling (you can test this yourself). For distortion, both graphs show smooth declines from $k$=2 onwards. This is all uncertain: is it 2, 4 or 8? 20 could be as valid as any other number of clusters. Let's go with 8 and see what happens.
+
+::: {.callout-note}
+## FLAG: Missing k-means code
+**August: the k-means fitting code with $k$=8 is not shown in the chapter.** The variable `y_kmeans` is used in subsequent code blocks but never created in the visible pipeline code. You need to add a code block here, something like:
+```
+kmeans = KMeans(n_clusters=8, init='k-means++', n_init='auto', random_state=42)
+y_kmeans = kmeans.fit_predict(X)
+```
+:::
+
+We'll visualise the results with silhouette scores and t-SNE to get a general idea. 
+
+![Figure 15.16: Silhouette scores and t-SNE visualisation for $k$=8 clusters on standardised features](images/chap15_images/silhoute_pca_standard.png){#fig-silhouette-tsne-standard fig-align="center" fig-alt="Left panel shows silhouette plot with 8 clusters, most positive but cluster 7 partially negative. Right panel shows t-SNE scatter plot with 8 coloured clusters showing some overlap"}
+
+What should be immediately obvious is that the silhouette scores are generally positive for our scaled data, although cluster 7 has about half negative scores. This is a sign that the cluster may not be a good addition, but it could be due to the amount of data we have, or it could be a sign that we should use a different clustering algorithm.
+
+The t-SNE also shows that the clusters are largely distinct, but there is some overlapping of labels. This suggests our approach is not working perfectly, and we should consider:
+
+* a different algorithm, e.g. hierarchical clustering, DBSCAN, Gaussian mixture models, self-organising maps
+* a different number of clusters, e.g. 2, 4, 16, 32
+* more data, i.e. more features
+* wrangling the data differently, for example there is missing-at-random (and missing-not-at-random) data that could be imputed, which likely affects performance  
+* a different dimensionality reduction technique
+
+We can run a more controlled t-SNE and tune the parameters to see if this is more to do with our visualisation than the clustering itself. We should remember that t-SNE is a dimensionality reduction technique that here takes 37 features down to 2. Reducing feature space with t-SNE is by no means guaranteed to properly capture relative relationships between data points in 2D space. 
+```
+tsne = TSNE(
+        n_components=2, 
+        perplexity=60, 
+        n_iter=1200, 
+        random_state=86743, 
+        method='barnes_hut',
+        init="pca",
+        n_jobs=-1
+    )
+
+X_tsne = tsne.fit_transform(X)
+tsne_df = pd.DataFrame(X_tsne, columns=['tsne1', 'tsne2'])
+tsne_df['cluster'] = y_kmeans
+
+plt.figure(figsize=(10, 8))
+sns.scatterplot(data=tsne_df, 
+    x='tsne1', y='tsne2', 
+    hue='cluster', palette=custom_palette, s=80, edgecolor='black', linewidth=0.5, alpha=0.8)
+```
+
+![Figure 15.17: Tuned t-SNE visualisation of $k$=8 clusters on standardised features](images/chap15_images/tsne_standard.png){#fig-tsne-standard fig-align="center" fig-alt="t-SNE scatter plot with 8 clusters, showing clearer separation than the previous plot after tuning perplexity"}
+
+Overall, despite some pollution in the cluster boundaries, the clusters look reasonably well defined.
+
+### Building GFMs with cluster labels
+
+We can get an idea for how well this is working by building a GFM with default parameters that utilises the cluster labels, and comparing the overall performance with a model that uses no clusters. This gives us a direct measure of how well labels help or hinder the model. First we have to join the cluster labels to our feature dataset.
+```
+feature_df = pd.concat([feature_df.reset_index(drop=True), tsne_df.reset_index(drop=True)], axis=1)
+```
+
+Then we create a static exogenous feature DataFrame, which is specific to Nixtla libraries. This DataFrame consists of the unique_id and the various static identifiers. Here we use clusters, but you could use locations if you had multiple, or business groupings such as luxury brands or services. We one-hot encode the cluster label, as this works better than a single integer vector.     
+```
+static_df = feature_df[['unique_id', 'cluster']].copy()
+
+cluster_dummies = pd.get_dummies(static_df['cluster'], prefix='cluster')
+static_df = pd.concat([static_df[['unique_id']], cluster_dummies], axis=1)
+```
+
+Now all we need to do is instantiate our models (default hyperparameters) and train them, with and without our `static_df`.
+```
+max_steps = 3500
+early_stop_patience = 50
+h = 90
+
+models = [
+    NHITS(
+        input_size=90,
+        h=h,
+        max_steps=max_steps,
+        scaler_type='standard',
+        loss=MAE(),
+        hist_exog_list=None,
+        futr_exog_list=['price'],
+        stat_exog_list=['cluster_0', 'cluster_1', 'cluster_2', 'cluster_3', 
+                        'cluster_4', 'cluster_5', 'cluster_6', 'cluster_7'],    
+        early_stop_patience_steps=early_stop_patience,
+        learning_rate=0.001,
+        alias='NHITS_with_clusters'
+    ), 
+    NHITS(
+        input_size=90,
+        h=h,
+        max_steps=max_steps,
+        scaler_type='standard',
+        loss=MAE(),
+        hist_exog_list=None,
+        futr_exog_list=['price'],  
+        stat_exog_list=None,
+        early_stop_patience_steps=early_stop_patience,
+        learning_rate=0.001,
+        alias='NHITS_no_clusters'  
+    )
+]
+
+nf = NeuralForecast(models=models, freq='D')
+
+nf.fit(
+    df=train_df,
+    static_df=static_df,
+    val_size=90,
+    verbose=True
+)
+
+predictions = nf.predict(futr_df=val_df, static_df=static_df)
+```
+
+If you're interested in the training losses and the full code, please see the notebook (chap15.ipynb) in the book repository. We created a lot of error metrics, looking at the overall dataset predictive performance, per-series performance and performance relative to a naive baseline. 
+
+**Table 15.4:** Overall error metrics for N-HITS trained with and without cluster identifiers as a static covariate. Relative RMSE is expressed against a seasonal naive baseline; lower is better for all metrics except `total_wins`, which counts the number of series (out of 12,152) where each model produced the lowest error for a given metric.
+
+| Model | MAE | MSE | RMSE | MASE | MAPE | sMAPE | Rel. RMSE |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| NHITS_with_clusters | 1.4226 | 11.1888 | 2.0152 | 1.0619 | 0.4928 | 0.2037 | 0.8651 |
+| NHITS_no_clusters   | 1.4494 | 11.7563 | 2.0481 | 1.0694 | 0.4865 | 0.2074 | 0.8868 |
+
+Per-series wins (number of series where the model achieved the lowest value for each metric):
+
+| Model | Rank | MAE wins | MSE wins | RMSE wins | MASE wins | Total wins |
+|---|---:|---:|---:|---:|---:|---:|
+| NHITS_with_clusters | 1 | 2000 | 1512 | 1512 | 2000 | 7024 |
+| NHITS_no_clusters   | 2 | 1038 | 1526 | 1526 | 1038 | 5128 |
+
+After all this we have some slight reductions in MAE and RMSE for both standard and relative metrics, but overall there is only a small difference in how well the clustered model beats the non-clustered model. It is encouraging that both beat the naive model strongly. The individual series performance is negligible for RMSE; I'm inclined to ignore the other metrics due to inherent issues in their calculations relative to this data. 
+
+It could be that the clusters could be improved, or that the model is not complex enough to take advantage of the clusters. We applied both of these options in the notebook. First, we applied some hyperparameter tuning using `neuralforecast`'s auto models to the clustered and non-clustered data. 
+
+The results show modest improvements with clustering:
+
+**Table 15.5:** Overall error metrics for the hyperparameter-tuned AutoNHITS variants, with and without cluster identifiers. Compare against Table 15.4 for the default N-HITS baselines.
+
+| Model | MAE | MSE | RMSE | MASE | MAPE | sMAPE |
+|---|---:|---:|---:|---:|---:|---:|
+| AutoNHITS_clustered    | 1.4369 | 12.2863 | 2.0279 | 1.0620 | 0.5083 | 0.2022 |
+| AutoNHITS_no_clusters  | 1.4288 | 10.9642 | 2.0198 | 1.0589 | 0.5042 | 0.2038 |
+
+Comparing Table 15.5 against Table 15.4, hyperparameter tuning only helped improve the model without cluster labels, and only slightly. As we mentioned before, the cluster labels didn't look great, and we could easily try more clusters. We could also clean up our feature representations by denoising them with an autoencoder.
+
+### Denoising with an autoencoder
+
+Autoencoders are **self-supervised representation learners**. An autoencoder takes an input vector $\mathbf{x}\in\mathbb{R}^{d}$ and compresses it with an *encoder* $f_{\theta}:\mathbb{R}^{d}\!\to\!\mathbb{R}^{k}$ into a latent space $\mathbf{z}=f_{\theta}(\mathbf{x})$, then reconstructs it with a *decoder* $g_{\phi}:\mathbb{R}^{k}\!\to\!\mathbb{R}^{d}$, yielding $\hat{\mathbf{x}}=g_{\phi}(\mathbf{z})$. The goal of training is to minimise a reconstruction loss, commonly the mean-squared error $\mathcal{L}_{\text{rec}}=\|\mathbf{x}-\hat{\mathbf{x}}\|_{2}^{2}$, so the network learns to retain signal while discarding nuisance variation. A common way to think about this is that an art forger is trying to reconstruct a lost piece of artwork (the input), compressing it through their understanding (the encoder and latent space) and then recreating it (the decoder). To succeed they must fool an art historian (the loss function). Unlike in real life, our forger gets multiple attempts until its reconstruction is good enough (loss minimised). 
+
+![Figure 15.18: Denoising autoencoder architecture diagram](images/chap15_images/dae_diagram.png){#fig-dae-diagram fig-align="center" fig-alt="Diagram showing the encoder-decoder architecture of a denoising autoencoder"}
+
+A **denoising autoencoder (DAE)**, as seen in Figure 15.18, adds an explicit corruption step in the training loop, typically Gaussian noise on our input, dropout on the hidden units, or both, so we are training our network to reconstruct a clean signal from corrupted inputs. This forces the latent space to store stable structure rather than spurious fluctuations, which can translate into more reliable distance metrics downstream.
+
+In our pipeline we feed the 37-dimensional feature matrix (already min-max normalised) into a modest multilayer autoencoder with layers 128 > 64 > `encoding_dim`, and we set `encoding_dim=input_dim`. Encoder expands to 128 units then compresses back to a 37-dimensional bottleneck at `encoding_dim`, so there's a bottleneck in the expand-then-compress sense but it's not *undercomplete*: code and input share dimensionality. An overcomplete autoencoder like this can learn identity if nothing stops it, which is why we add dropout ($p=0.1$) on every hidden layer. As our tsfeatures are noisy, computed on short and intermittent series, dropout-regularised reconstruction helps keep structure that's common across series and reduces per-series wobble. The `encode()` step gives us the embedding $\mathbf{z}$ we then cluster with k-means. Hopkins comes out at 0.86 and the elbow is sharper after this step. Using cluster labels based on these encoded features gives a better global RMSE for our N-HITS model. If we'd set $k<d$, the same architecture would double as non-linear dimensionality reduction, giving us a compact code we could reuse for clustering, nearest-neighbour search, or as static side-information in the GFM.
+
+It's worth considering how this compares to alternatives. PCA is a linear projection tied to second-order moments, so it cannot capture the non-linear interactions among features that matter here (for example, when seasonality strength and volatility interact multiplicatively). t-SNE excels at visualisation but has no analytical inverse and fails on out-of-sample points, making it unsuitable as a preprocessing step. The autoencoder provides a deterministic mapping $\mathbf{x}\mapsto\mathbf{z}$ and a parametric decoder, both of which scale to millions of series with mini-batch SGD. At inference, the `encode()` method extracts `encoded_features`, a NumPy array ready for elbow analysis. Reducing `encoding_dim` to, say, 7 would simultaneously denoise and compress, enabling experiments on the trade-off between latent dimensionality and GFM accuracy.
+
+We start by preparing the feature data for the autoencoder and scaling it separately.
+```
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from torch.utils.data import DataLoader, TensorDataset
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(f"Using device: {device}")
+
+autoencoder_features = feature_df.drop(['unique_id', 'cluster', 'tsne1', 'tsne2'], axis=1, errors='ignore')
+
+from sklearn.preprocessing import MinMaxScaler
+ae_scaler = MinMaxScaler()
+ae_scaled_data = ae_scaler.fit_transform(autoencoder_features)
+```
+
+Our `TimeSeriesAutoencoder` code initialises weights with Xavier uniform for stable gradients, and uses Adam with weight decay to curb overfitting. The encoder first widens the raw 37-dimensional vector to 128 units before funnelling it down to the latent code. This expand-then-compress pattern lets the network discover non-linear feature interactions in a higher-capacity space and then distil only the salient ones into `encoding_dim` units. The decoder mirrors this trajectory, with the trailing `Sigmoid` keeping reconstructions in $[0,1]$ to match the min-max scaled inputs.
+```
+class TimeSeriesAutoencoder(nn.Module):
+    def __init__(self, input_dim, encoding_dim=7):
+        super(TimeSeriesAutoencoder, self).__init__()
+        self.input_dim = input_dim
+        self.encoding_dim = encoding_dim
+        
+        self.encoder = nn.Sequential(
+            nn.Linear(input_dim, 128),
+            nn.ReLU(),
+            nn.Dropout(0.1),
+            nn.Linear(128, 64),
+            nn.ReLU(),
+            nn.Dropout(0.1),
+            nn.Linear(64, encoding_dim)
+        )
+        
+        self.decoder = nn.Sequential(
+            nn.Linear(encoding_dim, 64),
+            nn.ReLU(),
+            nn.Dropout(0.1),
+            nn.Linear(64, 128),
+            nn.ReLU(),
+            nn.Dropout(0.1),
+            nn.Linear(128, input_dim),
+            nn.Sigmoid()
+        )
+        
+        self._init_weights()
+    
+    def _init_weights(self):
+        for module in self.modules():
+            if isinstance(module, nn.Linear):
+                nn.init.xavier_uniform_(module.weight)
+                if module.bias is not None:
+                    nn.init.zeros_(module.bias)
+    
+    def forward(self, x):
+        encoded = self.encoder(x)
+        decoded = self.decoder(encoded)
+        return decoded
+    
+    def encode(self, x):
+        return self.encoder(x)
+```
+
+A stricter reading of 'denoising autoencoder', following @vincentExtractingComposingRobust2008, needs an explicit input-corruption step: add Gaussian noise $\epsilon\sim\mathcal{N}(0,\sigma^{2})$ to each mini-batch before a forward pass (`batch_data += torch.randn_like(batch_data) * 0.05`). We don't do that here. Our features are already noisy, and the `nn.Dropout(0.1)` layers inside the encoder and decoder mask 10% of activations with zero on each forward pass — *Bernoulli corruption* of the hidden units which plays a similar role to input noise. If you wanted to try the stricter version it's a one-line change in the training loop. If you add noise to batching you'll want to tune the value. 
+
+We wrap the scaled feature matrix in a `TensorDataset`, train for 500 epochs with `batch_size=256`, and record the epoch-level MSE.
+```
+input_dim = autoencoder_features.shape[1]
+encoding_dim = input_dim  # no compressive bottleneck; set lower for dimensionality reduction
+model = TimeSeriesAutoencoder(input_dim, encoding_dim).to(device)
+
+X_tensor = torch.FloatTensor(ae_scaled_data).to(device)
+dataset = TensorDataset(X_tensor, X_tensor)
+dataloader = DataLoader(dataset, batch_size=256, shuffle=True)
+
+criterion = nn.MSELoss()
+optimizer = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5)
+
+epochs = 500
+train_losses = []
+model.train()
+
+print(f"Training autoencoder: {input_dim} -> {encoding_dim} dimensions")
+for epoch in range(epochs):
+    epoch_loss = 0.0
+    batch_count = 0
+    
+    for batch_data, _ in dataloader:
+        outputs = model(batch_data)
+        loss = criterion(outputs, batch_data)
+        
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        
+        epoch_loss += loss.item()
+        batch_count += 1
+    
+    avg_loss = epoch_loss / batch_count
+    train_losses.append(avg_loss)
+    
+    if (epoch + 1) % 20 == 0:
+        print(f'Epoch [{epoch+1}/{epochs}], Loss: {avg_loss:.6f}')
+```
+
+Once the autoencoder is trained we can pull the embedding via `model.encode()` or the full-dimensional reconstruction via `model()`. You can reuse this model rather than retraining it if you have similar data, although you would need to reuse the same `ae_scaler` to transform any new data before feeding it through `model.encode()` so the latent space stays consistent.
+
+```
+model.eval()
+with torch.no_grad():
+    X_tensor = torch.FloatTensor(ae_scaled_data).to(device)
+    encoded_features = model.encode(X_tensor).cpu().numpy()
+
+print(f"Encoded features shape: {encoded_features.shape}")
+```
+
+### Autoencoder hyperparameters
+
+**Table 15.6:** Autoencoder hyperparameters used for denoising tsfeatures matrix, with their defaults, the role each plays in the model, and alternatives worth trying in a grid search.
+
+| Component | Default | Purpose | Alternatives |
+|-----------|---------|---------|--------------|
+| `encoding_dim` | = 37 (pure denoise) | Controls compression ratio | 7–15 for dimensionality reduction |
+| Hidden widths | 128 > 64 | Balance capacity vs overfit | {256, 128} or staircase 128 > 64 > 32 |
+| Dropout $p$ | 0.1 | Noise strength | {0.0, 0.2, 0.3} in grid search |
+| Optimiser | Adam, 1e-3 | Fast convergence | AdamW or Ranger, schedulers (One-Cycle) |
+| Loss | MSE | Stable for $[0,1]$ inputs | MAE or Huber if outliers dominate |
+
+A practical recipe is to start with `encoding_dim` $\approx d/4$, and monitor validation MSE. If it rises sharply, the bottleneck is too tight. Conversely, if clustering metrics plateau, reduce `encoding_dim`, deepen the encoder, or raise dropout to promote disentanglement. As usual, our guiding principle is *systematic experimentation*: iterate on capacity and noise until the elbow plot and forecasting metrics converge.
+```
+print("Analysing optimal clusters for autoencoder features...")
+kmeans_elbow(
+    X=encoded_features,
+    palette=custom_palette,
+    k_distortion=(1, 30),
+    k_ch=(2, 30),
+)
+```
+
+### Results
+
+So how does our new model do with the denoised data, more cluster labels, and inheriting the hyperparameters of tuned model?
+
+**Table 15.7:** Summary of every GFM variant tested, ranked by relative RMSE against seasonal naive baseline. 
+
+| Model | MAE | MSE | RMSE | MASE | MAPE | sMAPE | Rel. RMSE | Rel. MAE |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| AutoNHITS_ae_clustered            | 1.4016 | 10.3491 | 1.9990 | 1.0543 | 0.4839 | 0.2016 | 0.8320 | 0.7895 |
+| AutoNHITS_no_clusters             | 1.4288 | 10.9642 | 2.0198 | 1.0589 | 0.5042 | 0.2038 | 0.8564 | 0.8048 |
+| NHITS_with_clusters               | 1.4226 | 11.1888 | 2.0152 | 1.0619 | 0.4928 | 0.2037 | 0.8651 | 0.8013 |
+| NHITS_no_clusters                 | 1.4494 | 11.7563 | 2.0481 | 1.0694 | 0.4865 | 0.2074 | 0.8868 | 0.8165 |
+| NHITS_cluster_specific (hyperopt) | 1.4772 | 12.0326 | 2.0697 | 1.1291 | 0.5317 | 0.2064 | 0.8972 | 0.8321 |
+| AutoNHITS_clustered               | 1.4369 | 12.2863 | 2.0279 | 1.0620 | 0.5083 | 0.2022 | 0.9066 | 0.8094 |
+| NHITS_cluster_specific_default    | 1.4599 | 15.4619 | 2.0589 | 1.0871 | 0.5110 | 0.2092 | 1.0170 | 0.8224 |
+
+The autoencoded clustering approach achieved our best global performance (RMSE = 1.999), with a relative RMSE of 0.832. That's a 2.4% improvement over the default no-cluster baseline (2.048), or 1.0% over the tuned baseline (2.020). Notably, we didn't re-run hyperparameter optimisation after switching to the autoencoded cluster labels, and adding or changing static features shifts the input distribution the model sees, which likely shifts the optimal hyperparameters too. A fairer comparison would retune each variant.
+
+We also created 20 GFMs, one for each cluster level: one set inheriting the hyperparameters from our previous tuning, and another with default models.
+
+**Table 15.8:** Error metrics for the 20 cluster-specific N-HITS models, with default hyperparameters and with hyperparameters inherited from the AutoNHITS tuning run. Metrics are aggregated across all 12,152 series.
+
+| Model | MAE | MSE | RMSE | MASE | MAPE | sMAPE | Rel. RMSE | Rel. MAE |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| NHITS_cluster_specific_default | 1.4599 | 15.4619 | 2.0589 | 1.0871 | 0.5110 | 0.2092 | 1.0170 | 0.8224 |
+| NHITS_cluster_specific (hyperopt) | 1.4772 | 12.0326 | 2.0697 | 1.1291 | 0.5317 | 0.2064 | 0.8972 | 0.8321 |
+
+Neither of these approaches improves on the global error of our autoencoded-clusters GFM. The default cluster-specific variant in particular is the only model in our experiment to post a relative RMSE worse than the seasonal naive baseline (1.0170), which is a useful negative: dropping from a well-regularised global model to twenty smaller ones with no tuning throws away more signal than cluster structures can make up for. That said, the cluster-specific GFMs, both the default and tuned versions, along with N-HITS with no clusters, are actually the best performers at the individual series level; the autoencoded-clusters GFM only wins 1,302 of 12,152 series despite its strong global RMSE. The global error metric is likely being driven by a subset of series where the autoencoded clustering provides a strong signal, and the global model's forecasts are probably fairly conservative, performing well on average but poorly on individual series where the cluster-specific models can specialise.
+
+Given the results of modelling and evaluation, we can see firstly that clustering helps a little with default hyperparameters, but the tuned model with clusters isn't actually better than the tuned model without. The unclustered hyperparameter-tuned model is better than its direct default comparison, which may point to an issue with the validation step (a simple split), a lack of comparisons, missing important hyperparameters like batch size from the tuning, or a failure to increase the upper bound of hyperparameters like `max_steps`. Regardless, increasing the number of clusters and denoising the data gave us some significant improvements at the full model level, which is how we should evaluate this. However, the individual series performance was not fantastic, which does point towards the necessity of using more than one model in a system and selecting between or combining some of them. It's also the case that we should probably have run a new hyperparameter search with the autoencoded clusters, as they are different to the original set.
+
+There are several further improvements we could explore:
+
+* Using multiple models, e.g. a GFM with CatBoost, and ensembling the results together
+* Applying models to clusters, or clusters plus some hierarchical level (to some extent this is what the M5 winners did with their models, without the clustering)
+* Allowing training to run for longer
+* Running the autoencoder with different stopping parameters, e.g. a lower learning rate, or changing the autoencoder architecture to improve cluster quality
+* Creating time series features from exogenous variables (e.g. price), if the exogenous variable is predictive of the dependent variable
+* Building more, or more specific, features that depend on domain knowledge and EDA (we also ignored a lot of potentially useful features such as holidays and promotions)
+* Cleaning the data properly, as there are outliers, missing values and other issues that could be affecting results.
+* Add a zero threshold or zero inflation model to deal with sparcity. 
+
+## Evaluating clustering results
+
+Evaluating time series clusters presents a problem: without ground truth labels, how do we know if our clusters are meaningful? This is particularly tricky in TSCL, where internal metrics often provide misleading guidance.
+
+Standard internal metrics like the silhouette coefficient, Calinski-Harabasz index, and Davies-Bouldin score attempt to quantify cluster quality through geometric properties. The silhouette coefficient for a point $i$ is defined as:
+
+$$s(i) = \frac{b(i) - a(i)}{\max(a(i), b(i))}$$
+
+where $a(i)$ is the mean intra-cluster distance and $b(i)$ is the mean nearest-cluster distance for point $i$. Values close to 1 indicate well-clustered points, values near 0 indicate points on cluster boundaries, and negative values indicate points likely assigned to the wrong cluster.
+
+These metrics can be about as useful as a chocolate teapot for time series clustering, and there are a few reasons why. High-dimensional feature spaces can make geometric separation misleading, since distances in many dimensions tend to concentrate. Pattern-based similarity doesn't always translate to Euclidean proximity, especially when our features are themselves summaries of temporal structure. And the optimal $k$ suggestions from elbow plots and silhouette analysis often conflict with each other, or simply lack a clear optimum, as we saw with our M5 data where the Calinski-Harabasz index suggested $k$=2 for scaled features. That is clearly inadequate for capturing the diversity in 3,038 time series, and in fact increasing our clusters to 20 had a more beneficial effect on forecasting performance.
+
+The most reliable evaluation strategy for our purposes is **extrinsic validation**: measuring whether clusters improve performance on the downstream task. For forecasting applications, this means comparing models trained with and without cluster labels:
+```
+def evaluate_clustering_impact(train_data, clusters, model_class, horizon=90):
+    """
+    Evaluate clustering by comparing forecasting performance
+    with and without cluster information.
+    """
+    clustered_model = model_class(stat_exog_list=cluster_features)
+    clustered_rmse = train_and_evaluate(clustered_model, train_data)
+    
+    baseline_model = model_class(stat_exog_list=None)
+    baseline_rmse = train_and_evaluate(baseline_model, train_data)
+    
+    improvement = (baseline_rmse - clustered_rmse) / baseline_rmse
+    return improvement
+```
+
+This is essentially the approach we took, with our clustering and modelling being guided by forecasting performance. Our best autoencoded clustering achieved RMSE = 1.999, a 2.4% improvement over the default no-cluster baseline (RMSE = 2.048) or 1.0% over the tuned baseline (RMSE = 2.020) — neither of which the internal metrics, which suggested $k$=2, would have predicted.  
+
+::: {.callout-tip}
+Adding new static features or switching to encoded cluster labels changes the input distribution a model sees, which is highly likely to shift the optimal hyperparameters likely. A cleaner comparison would re-run the hyperparameter search for each variant rather than reusing a single tuned configuration across them.
+:::
+
+
+## Summary
+
+We have learnt that time series data may be clustered together using several methods, and that the variety of approaches gives us multiple pathways when we need to group similar temporal patterns. Distance-based methods, including Dynamic Time Warping and Shape-Based Distance, are conceptually simple but suffer from quadratic computational complexity that makes them impractical for large datasets. We can ensemble these together (*hierarchical clustering with DTW*) for better performance, but this exacerbates the scalability issue.
+
+Subsequence-based methods like shapelets offer excellent interpretability and can capture local patterns that global statistics miss. However, they face combinatorial search complexity that becomes prohibitive at scale, making them suitable primarily for smaller datasets or specialised applications where interpretability is paramount.
+
+Feature-based clustering is the most practical solution for production systems. Using libraries like `tsfeatures` or `catch22`, we can transform time series into fixed-length statistical summaries that capture essential characteristics: trend, seasonality, autocorrelation, and distributional properties. This approach scales linearly with dataset size and provides interpretable results, though it requires careful preprocessing and domain knowledge to select meaningful features. In our M5 experiments, feature-based clustering with proper scaling and denoising achieved the best forecasting improvements.
+
+Two-stage pipelines that combine autoencoders with standard clustering algorithms also show considerable promise. Our autoencoder experiments achieved the best overall performance (RMSE = 1.999), and although we used statistical featurisation rather than neural networks to create the initial representations, the principle is the same: a learned, denoised representation can outperform the raw feature set. End-to-end deep clustering methods require substantial computational resources, large datasets, and careful hyperparameter tuning, which limits their accessibility for many applications.
+
+Throughout our experiments, preprocessing often mattered as much as the algorithm choice, perhaps more so. Decisions about scaling, detrending, and noise reduction fundamentally shape what patterns our clustering algorithm can discover. Evaluation also remains challenging: internal metrics like silhouette scores provide only rough guidance, with the most reliable validation coming downstream at task performance.
+
+If you take one thing away from this chapter, it should be this: start with feature-based approaches using established libraries, validate through forecasting performance rather than internal metrics, and treat preprocessing as a critical hyperparameter to optimise. The modest improvements we achieved (a 2.4% RMSE reduction over the default baseline, about 1% against the tuned baseline) show that clustering can enhance global forecasting models, though it's not a silver bullet. It is, however, a useful additional option in our toolkit when we need to improve GFM performance at scale.
+
+In the next chapter we move from clustering to embeddings, where we'll see how learned vector representations can capture semantic and temporal structure in ways that complement the featurisation approaches we've explored here.
+
+
+
+
+
+
