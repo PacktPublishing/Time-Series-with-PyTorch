@@ -1,0 +1,1478 @@
+---
+title: "Optimisation"
+bibliography: references\optimisation.bib 
+format: 
+  docx:
+    reference-doc: templates\packt-sample-chapter.docx
+    toc: true  
+    toc-depth: 4 
+    number-section: true 
+    toc-title: Contents
+---
+
+# 6
+# Optimisation
+
+
+```{python}
+#| label: Chapter 6 libraries
+#| message: false
+#| echo: false
+#| eval: true
+
+import os
+import sys
+import psutil
+from pathlib import Path
+
+import pandas as pd
+import seaborn as sns
+import numpy as np
+
+import itertools
+
+import torch
+import torch.nn as nn
+from torch.optim import SGD, Adam
+import lightning as L
+from lightning.pytorch.callbacks.early_stopping import EarlyStopping
+from lightning.pytorch.loggers import CSVLogger
+from torch.utils.data import DataLoader, TensorDataset
+
+import optuna
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import mean_squared_error, mean_absolute_error
+
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
+from matplotlib.patches import Patch
+plt.style.use('fivethirtyeight')
+
+# Get working directory
+cwd = os.getcwd()
+
+# Get parent directory
+parent_dir = os.path.dirname(cwd)
+
+# Add parent directory to system path
+sys.path.insert(0, parent_dir)
+
+# Import plot function for activation
+from src.utils import plot_activation_fn, plot_activation_fn_and_derivative, plot_grid, sample_grid, colorizer
+
+
+
+# Define palette
+custom_palette = ["#000000", "#0072B2", "#D55E00","#009E73","#CC79A7", "#56B4E9","#E69F00"]
+line_styles = ['-', '--', '-.', ':']
+
+plt.rcParams['figure.figsize'] = (8, 4)
+plt.rcParams['font.family'] = 'sans-serif'
+plt.rcParams['font.sans-serif'] = ['Source Sans Pro', 'Arial']
+plt.rcParams['font.size'] = 14
+plt.rcParams['axes.labelsize'] = 14
+plt.rcParams['lines.linewidth'] = 2
+plt.rcParams['axes.titlesize'] = 18
+
+# general settings
+class CFG:
+    data_folder = Path.cwd().parent / "data"
+    img_dim1 = 12
+    img_dim2 = 6
+    fontsize = 18
+    
+    
+# adjust the parameters for displayed figures    
+plt.rcParams.update({'figure.figsize': (CFG.img_dim1,CFG.img_dim2)}) 
+
+# Mean Absolute Error (MAE)
+def mae(actual, predicted):
+    return np.mean(np.abs(predicted - actual))
+
+# Mean Squared Error (MSE)
+def mse(actual, predicted):
+    return np.mean(np.square(predicted - actual))
+
+# Root Mean Squared Error (RMSE)
+def rmse(actual, predicted):
+    return np.sqrt(np.mean(np.square(predicted - actual)))
+
+# Mean Absolute Percentage Error (MAPE)
+def mape(actual, predicted):
+    mask = actual != 0
+    return np.mean(np.abs((actual[mask] - predicted[mask]) / actual[mask])) * 100
+
+# symetrical MAPE (sMAPE)
+def smape(actual, predicted):
+    return 100/len(actual) * np.sum(2 * np.abs(predicted - actual) / (np.abs(actual) + np.abs(predicted)))
+
+# denormalize 
+def denormalize(tensor, min_val, max_val):
+    return tensor * (max_val - min_val) + min_val
+
+# read tsf function
+
+# Get working directory
+cwd = os.getcwd()
+
+# Get parent directory
+parent_dir = os.path.dirname(cwd)
+
+# Build path to src directory
+src_dir = os.path.join(parent_dir, 'src')
+
+# Add src directory to system path
+sys.path.insert(0, src_dir)
+
+# Import datalaoder for tsf file
+from tsf_data_loader import convert_tsf_to_dataframe
+
+```
+
+# Optimization
+
+## Introduction to optimisation
+"If he [Thomas Edison] had a needle to find in a haystack, he would not stop to reason where it was most likely to be, but would proceed at once with the feverish diligence of a bee, to examine straw after straw until he found the object of his search… Just a little theory and calculation would have saved him ninety percent of his labor." ― Nikola Tesla
+
+As we have seen, neural network architectures are highly flexible structures with vast *parameter spaces* that allow them to capture intricate patterns within datasets. However, realising each architecture's full potential requires thoughtful consideration of hyperparameter optimisation — the process of finding the optimal *design* of a model relative to our data, including selecting activation functions, regularisation methods, and learning rates, all of which govern how a model trains and compresses data into function. This process is both critical and challenging due to the complex interplay of architectural decisions, training algorithms, and hyperparameters. For instance, choices made in selecting the training algorithm for "simple" FFNs/MLPs profoundly impact model sensitivity and forecasting accuracy. In this chapter, we will build on our understanding of FFNs/MLPs by exploring neural network optimisation and the processes that allow us to extract the best performance from our models.
+
+We can tailor neural network hyperparameters to fit different time series datasets, but additional care in architecture saves time, compute, and improves performance. You could, of course, undertake a brute-force approach, testing every permutation of design, but an intelligent approach, as Tesla suggests, is usually more efficient. Focused experimentation aligns more closely with contemporary optimisation practices across machine learning. The optimisation of neural architectures applies similar principles to the approaches we take for tuning hyperparameters for algorithms like boosted decision trees, although it's not unreasonable to suggest that neural networks tend to be more sensitive to tuning processes than other modelling approaches; haphazard optimisation easily triggers overfitting, underfitting, and convergence to local minima.
+
+::: {.callout-note}
+## A note on terminology
+Optimisation algorithms are used in training networks via backpropagation. When we talk of optimisation here, we are discussing the overall process of optimisation, which includes selecting elements of network design and training parameters.
+:::
+
+In this chapter, we will:
+
+* Deepen our understanding of activation functions 
+* Learn how loss functions impact training and performance of neural architectures
+* Discuss optimisation algorithms
+* Cover factors such as learning rate, batch size, and iterations 
+* Build neural architectures with Lightning for forecasting 
+* Experiment with neural network parameters: number of nodes, layers, and epochs, and learn how to tune these efficiently (using Optuna)
+* Benchmark performance: compare the accuracy of neural networks against naïve and statistical models
+
+
+## Optimisation cost
+> "I have not failed. I've just found 10,000 ways that won't work." — Thomas A. Edison
+
+While neural networks provide forecasting practitioners with intricate tools for modelling, they come with a large number of options and a parameter space that can dwarf simpler models, which translates into neural networks often consuming significant computational resources and time to train. An excellent study by Nixtla investigated modelling time series data (n = 3,003 series) with different approaches, finding that a simple statistical ensemble (a combination of models) can outperform most individual deep learning models. The statistical ensemble was 25,000x faster to train than a *slightly more accurate* ensemble of deep learning models (−0.36% sMAPE), which the authors stated took 14+ days to train at a cost of approximately $11,000. This contrasts starkly with the statistical ensemble, which took 6 minutes and cost $0.50 @StatsforecastExperimentsM3. While the findings can be questioned (see note), they aptly demonstrate that we must be careful when applying deep learning methods, and think about how best to train neural architectures efficiently. In situations where modelling and training is well planned, deep learning architectures can outperform other modelling approaches; a study by Zalando's data science team demonstrated that they achieved their best results for a panel of demand data (retail time series) with over 1 million series for approximately $275 USD @kunzDeepLearningBased2023. To get the best out of neural architectures, we need think about optimisation intelligently. This involves selecting the right activation functions, loss functions, and initialisation methods, as well as tuning hyperparameters and using techniques like batch normalisation and regularisation.
+
+::: {.callout-important}
+## Criticism of Nixtla's study
+It is worth pointing out that Nixtla's study was conducted using the [M3 dataset](https://forecasters.org/resources/time-series-data/m4-competition/), which consists 3,003 time-series which were sampled at yearly, quarterly or monthly frequency, with 40 to 120 observations per series. Such time series structures disadvantage more complex neural architectures, which require significant amounts of data to build models. 
+
+In addition I am skeptical about the cost of running a deep learning ensemble, but then again I don't use cloud processing because it is ridiculously expensive. If you have to do a lot of processing I personally recommend getting some rack space and to plug in some graphic cards, it is more cost effective in many cases 
+:::
+
+The most important component of any model is your data, and quality of that data. Neural networks and other approaches do not magically find patterns; the quality of your data not only affects how well a model fits, but how quickly it trains. It is not uncommon to encounter time series data that are slow to train. Commonly you'll find this issue with:
+
+* **Low-frequency data:** sales of pickles in a small village shop, for example, may record only a few transactions each week, making data sparse and infrequent. When combined with complex patterns (which is common), the convergence of neural network training can slow down significantly. These kinds of time series are generally better suited to simpler, linear models, which have far fewer parameters to estimate and do not require the large volumes of data that neural networks need to learn stable representations.
+* **High signal-to-noise ratio:** stock market data is a good example. The underlying patterns are generally obscured by irrelevant and random variations we cannot easily account for in modelling. With such data, models can spend a significant amount of time trying to differentiate between signal and noise. 
+* **Long sequence dependencies:** some time series are very long, which while providing useful data can also hinder modelling with neural networks like RNNs and LSTMs.
+* **High-dimensional data:** time series with many features, whether multivariate or multiexogenous-univariate, can be slow to train, especially if some of the additional features are weakly predictive. The additional dimensionality increases model complexity, slowing training and hindering convergence.
+* **Sparse or irregular data:** missing data is always annoying, sparse data is perhaps worse, but irregular data is the worst. Most modelling approaches rely on data that is evenly spaced; neural networks are no different. When data is irregular, the best approach is often to make it regular.    
+
+That isn't to say that we can't model such data, but that a good forecast may be slow to achieve with neural networks. This highlights the need for matching data with appropriate models, which we will come back to later when we discuss clustering.
+
+## Optimisation of neural networks
+
+Optimisation with neural networks starts with exploratory data analysis (EDA) to inform the preprocessing of data, such as handling missing values, creating features, and transforming data. Once your data is prepared, you should focus on optimising network design, which you can test on training data; this largely boils down to three areas @chenStudyOptimizationDeep2023:
+
+1. **Preprocessing:** missing values, dimensionality reduction, dealing with outliers and leverage, feature selection, decomposition, transformations, scaling and normalisation 
+2. **Architecture:** activation functions, number of nodes, number of hidden layers
+3. **Training optimisers and hyperparameters:** learning rate, batch size, regularisation, dropout
+
+![Neural architecture optimisation process](images/chap6_images/optimisation_process.png){fig-align="centre" fig-alt="Figure 6.1: Diagram showing the neural architecture optimisation process"}
+
+## Understanding Activation Functions
+
+Activation functions are crucial parts of neural architecture that determine outputs, accuracy, and computational efficiency @moonComparativeAnalysisArtificial2019 @ramachandranSearchingActivationFunctions2017. As we already know, without activation functions, networks essentially build linear regressions, which while excellent tools, have limited power for complex data challenges. As we learnt in the previous chapter, at the heart (neuron) of a neural network lies: 
+
+$$  
+y = f\left(\sum_{i=1}^{n} w_i x_i + b\right)  
+$$
+
+Here $f$ is an activation function, applied to a linear combination of inputs to a neuron: the sum ($\sum_{i=1}^{n}$) of weighted $w_i$ inputs $x_i$, plus bias. Activation functions are mathematical components we use to transform these inputs. What makes them crucial is that they allow networks to transform input vector space (a multi-dimensional space, with each dimension corresponding to an input or feature) into a linearly separable vector space. To do this, activation functions must be non-linear (have multiple degrees). Transforming inputs this way is not simply reshaping, but an 'unwarping' which makes underlying patterns in your data easier for a network to learn. This additional complexity enables neural networks to learn and adapt better to prediction errors during backpropagation, resulting in better functional approximations... in theory.
+
+
+::: {.callout-warning}
+## Why can't we use a linear activation function?
+Activation functions in neural networks, such as the linear function, generate a series of activation values. However, a major drawback of linear activation functions is that they have a constant derivative, which impacts backpropagation. A linear function's derivative (from $f(x) = cx$) implies no relationship with input $x$, hindering learning, as a constant derivative means that weight adjustments are not influenced by input variations.
+
+If linear functions are used in all layers of a neural network, the resulting linearity would limit a network to simple, linear data patterns, undermining any benefits of deep learning. Specifically, neurons in earlier layers would not add any representational capacity to the interconnecting layers @kizrakComparisonActivationFunctions2020.
+:::
+
+
+Our first challenge then is to work out which activation functions to choose. This is not a simple task because when we change activation function, we also change the partial derivatives of our neurons, which has differing effects on model builds @nielsenNeuralNetworksDeep2015. The goal of this section is not to point you to specific activation functions, as that's not practical, but to develop an understanding of how activation functions alter modelling and forecast accuracy.
+  
+
+### Taxonomy 
+
+There are a large number of activation functions, which are increasing in number with research, but we can generally categorise them as follows:
+
+* **Fixed-shape activation functions** do not change shape during training. 
+  * Rectified-based: includes the ReLU family of functions (ReLU, Leaky ReLU, etc). 
+  * Classic activation functions: functions not in the rectifier family, such as sigmoid and tanh.   
+* **Trainable activation functions** change shape during model training. Their shapes adapt to the training data, although many trainable functions can be approximated by adding more layers with fixed activations to a network.  
+  * Parameterised standard functions: these start as standard functions but include additional parameters that are learnt through training.
+  * Functions based on ensemble methods: ensembles of functions created by combining several distinct functions, generally via a linear combination.  
+ 
+Trainable activation functions are a relatively recent development. The main idea is that these functions have parameters which can be updated, meaning the function's shape can be adapted via training to better suit patterns in your data. While it can be beneficial to allow a network to learn the best weights, biases, and form of activation function in a given context, the downside of more parameters is *higher computational demand* (@apicellaSurveyModernTrainable2021; @binghamOptimizingNeuralNetworks2023). At time of writing, trainable activation functions are still largely in the realm of research, as benefits and drawbacks continue to be explored. We briefly cover one (Swish) in this chapter; a more thorough investigation can be found in this chapter's associated notebook.   
+
+This chapter will focus on the most popular activation functions, which are currently fixed-shape functions more prominent in industry.  
+
+### Layer-wise activation functions
+
+While it's possible to apply activation functions to individual neurons, in practice we apply them to entire layers of neurons in a network for *efficiency* and *simplicity*. Applying the same activation function to all neurons in a layer means we can compute a function once for all neurons, rather than individually for each one. This makes it easier to train a network and reduces computational cost, with the additional benefit that the simplicity makes it easier to comprehend what each layer is doing.   
+
+## Fixed-shape activation functions 
+
+The fixed-shape activation functions we cover here are the most commonly used in practice. We start with sigmoid (historically important), move through tanh, and then to ReLU and its variants, which are popular in modern architectures.
+
+### Sigmoid 
+
+Sigmoid activations are logistic functions that are differentiable at every point, meaning we can find a gradient at any point on a curve. If you recall, the original perceptron used a step/Heaviside function that was not differentiable, which prevented us from optimising networks with gradient descent via backpropagation, as it relies on a function's derivative. The sigmoid resolved this, allowing us to take any real-valued number and map it as a float between 0 and 1. This made sigmoid a strong choice for problems where predicted probabilities were required, as probabilities lie within the same range.
+
+$$\sigma(x) = \frac{1}{1 + e^{-x}}$$
+
+Furthermore, the rapid change in the sigmoid's values in the input range between −2 and +2 helps a network 'quickly' adjust its weights during the early stages of training, when it may be far from an optimal solution. 
+
+We can visualise sigmoid and its derivative using PyTorch
+
+```{python}
+#| label: Plot of Sigmoid Function and Derivative
+#| message: false
+#| echo: true
+#| eval: true
+
+x = torch.arange(-8.0, 8.0, 0.1, requires_grad=True)
+
+sigmoid = torch.nn.Sigmoid()
+
+plot_activation_fn_and_derivative(sigmoid, x, xlabel='x', ylabel='Sigmoid(x)', title='Sigmoid Activation Function')
+```
+
+::: {.callout-tip}
+Graphs inspired by @manuMODERNTIMESERIES2022 - recomended read! 
+:::
+
+Despite being helpful early on, sigmoids have several drawbacks. You can see in our graph that in the extremes $y$-values change minimally with respect to $x$. When training via backpropagation, these small gradients propagate through layers, becoming smaller until learning effectively stops. This becomes more of a problem as layers are added to a network @binghamOptimizingNeuralNetworks2023; @nwankpaActivationFunctionsComparison2018. This saturating of activation is a phenomenon best known as the *vanishing gradient* problem. It can slow learning and cause an optimisation algorithm to get stuck in local minima, limiting model performance. The related *exploding gradient* problem, where gradients grow uncontrollably large during backpropagation, is less common with sigmoid (whose derivatives are bounded below 1) but becomes relevant with other architectures and activation functions.
+
+![Vanishing and exploding gradients](images/chap6_images/vanishing_exploding_gradients.png){fig-align="centre" fig-alt="Figure 6.2: Bar charts showing gradient magnitude shrinking across layers (vanishing) and growing uncontrollably (exploding) during the backward pass"}
+
+Another issue is that outputs are not centred around zero, as they are squashed between 0 and 1. This makes all the outputs of a hidden layer either positive or negative, which obstructs gradient updates and slows training and convergence. You will tend to see sigmoids in output layers these days, for classification rather than hidden layers, though that doesn't mean you can't use them.  
+
+### Tanh
+
+To address issues with sigmoid, researchers eventually moved to using tanh; we can think of tanh as a mathematically shifted version of sigmoid. Because tanh is sigmoidal it has similar properties, but improves upon sigmoid by being zero-centred, with values mapping between −1 and 1. Zero-centring facilitates backpropagation and helps the function avoid the saturation that leads to vanishing gradients. Using tanh also means that negative inputs map to negative outputs, and near-zero values map close to zero, which results in faster training, particularly with multiple hidden layers. These factors helped it dominate training of neural networks in the 1990s to early 2000s @jagtapHowImportantAre2022. 
+
+It can be defined as:
+
+$$\sigma(x) = \frac{{e^x - e^{-x}}}{{e^x + e^{-x}}}$$
+
+* $\sigma(x)$ — output of tanh activation function
+* $x$ — inputs
+* $e$ — base of the natural logarithm
+
+We can plot tanh and its derivative in similarly:
+```{python}
+#| label: Plot of Tanh Function and Derivative
+#| message: false
+#| echo: true
+#| eval: true
+
+y_tanh = torch.nn.Tanh()
+
+plot_activation_fn_and_derivative(y_tanh, x, xlabel='x', ylabel='Tanh(x)', title='Tanh Activation Function')
+```
+
+Vanishing gradients are, however, still a problem for tanh, despite the derivatives being steeper than sigmoid's. This is especially an issue as hidden layers increase in a neural network. An additional issue is that tanh only attains its maximum gradient of 1 when the input is 0; for inputs further from zero the gradient falls towards 0, which can produce *dead neurons* — neurons that become effectively inactive because their near-zero gradients result in negligible weight updates during backpropagation @nwankpaActivationFunctionsComparison2018 @szandalaReviewComparisonCommonly2021. Despite this, tanh activations were and are used extensively in recurrent neural networks, just not so much in 'deeper' models.
+
+![Dead neurons in a network](images/chap6_images/dead_neurons.png){fig-align="centre" fig-alt="Figure 6.3: Comparison of a healthy network with varied activations versus a network with dead neurons that have zero gradient and contribute nothing to learning"}
+
+### ReLU 
+
+The Rectified Linear Unit (ReLU) activation function was introduced by Nair and Hinton in 2010 @nairRectifiedLinearUnits, and has become a cornerstone in deep learning due to its efficiency and effectiveness. As a nearly linear function, it allows fast computation while also adding non-linearity to a network, which facilitates optimisation with gradient descent, resulting in faster learning and outpacing traditional functions like sigmoid and tanh. 
+
+$\sigma(x) = \max(0, x)$
+
+* $\sigma(x)$ — output of ReLU activation function
+* $x$ — input to function
+
+ReLU rectifies input values less than zero by effectively setting them to zero, while being unbounded on the positive side, which mitigates the vanishing gradient problem seen in earlier (saturating) activation functions. This also adds sparsity to networks by zeroing out negative activations, which reduces space and time complexity by avoiding complex operations like exponentials and divisions. As a result we require less computational power, and generate more concise models with less noise and usually greater statistical inference.  
+
+```{python}
+#| label: Plot of ReLU Function and Derivative
+#| message: false
+#| echo: true
+#| eval: true
+
+y_relu = torch.nn.ReLU()
+
+plot_activation_fn_and_derivative(y_relu, x, xlabel='x', ylabel='ReLU(x)', title='ReLU Activation Function')
+```
+```{python}
+#| label: Plot of Leaky ReLU Function and Derivative
+#| message: false
+#| echo: true
+#| eval: true
+
+plot_activation_fn_and_derivative(torch.nn.LeakyReLU(negative_slope=0.1), x, xlabel='x', ylabel='Leaky ReLU(x)', title='Leaky ReLU Activation Function', ylim=(-2, 6))
+```
+
+ReLU-activated networks may have some issues. The first is the dying ReLU problem, which is caused by setting negative values to 0, resulting in gradients of 0. This makes ReLU 'fragile', leading to 'dead' neurons that give zero activation, hindering learning because there is no weight update during backpropagation @nwankpaActivationFunctionsComparison2018. It's not hard to imagine this being an issue with sparse demand data, for example. In addition, ReLU has a propensity to overfit compared to sigmoidal functions, although we can mitigate this with techniques like dropout. Despite this, ReLU's characteristics help it handle non-linearity and improve computational efficiency, making it a useful function to apply in the hidden layers of networks you will commonly use for forecasting, such as CNNs, RNNs, TCNs, and transformers.  
+
+As with tanh's saturation issue, ReLU have issues with *dying neurons*, several ReLU variants have been proposed, Leaky ReLU $\sigma(x) = \max(0.01x, x)$ is common, and its parameterised version (PReLU) $\sigma(x) = \max(\alpha x, x)$. In both cases, instead of setting negative inputs to 0, they assign a small value proportional to an input. As a result, gradients do not saturate to 0; if an input is negative, the gradient will be $\alpha$. In the case of Leaky ReLU, this is a constant value of generally 0.01 or 0.02, with no provision for choosing a value during training. In the case of PReLU, we learn the value of $\alpha$ as we train the weights and biases of our model, which of course adds computational complexity but can improve accuracy.
+
+```{python}
+#| label: Some plot of activation functions 
+#| message: false
+#| echo: true
+#| eval: true
+
+# Define range of input values
+x = torch.linspace(-10, 10, 1000, requires_grad=True)
+
+# Define activation functions
+activation_functions = {
+    'ReLU': torch.nn.ReLU(),
+    'Leaky ReLU': torch.nn.LeakyReLU(negative_slope=0.1)  # specify negative slope
+}
+
+# Plot each activation function and its derivative
+for name, fn in activation_functions.items():
+    # Compute activation function
+    y = fn(x)
+    
+    # Compute gradients
+    grad_y = torch.ones_like(y)
+    y.backward(grad_y, retain_graph=True)  # compute gradients
+    dy_dx = x.grad.clone()  # clone gradients
+    
+    # Plot activation function
+    plt.figure(figsize=(4, 3))
+    plt.plot(x.detach().numpy(), y.detach().numpy(), label=f'{name} function')
+    
+    # Plot derivative of activation function
+    plt.plot(x.detach().numpy(), dy_dx.detach().numpy(), linestyle='--', label=f'{name} derivative')
+    
+    # Set range of x and y axes
+    plt.xlim([-10, 10])
+    plt.ylim([-1.5, 1.5])
+    
+    # Add a horizontal line at y=0
+    plt.axhline(0, color='black', linewidth=1.5, linestyle='--')
+    
+    # Set labels
+    plt.xlabel('x')
+    plt.ylabel(f'{name}(x)')
+    plt.title(f'{name} Activation Function and its Derivative')
+    plt.legend()
+    
+    # Show plot
+    plt.show()
+    
+    # Clear gradients for next computation
+    x.grad.zero_()
+```
+
+### Trainable activation functions: Swish 
+
+Trainable activation functions like Swish add an extra layer of complexity to neural networks, which can improve performance @apicellaSurveyModernTrainable2021, or at least that is what is often seen in image studies. Trainable activation functions demonstrate the idea that almost any part of a network can be trained, not just weights and biases. 
+
+Swish is a relatively recent activation function, proposed by researchers at Google in 2017 @ramachandranSearchingActivationFunctions2017.  
+
+$\sigma(x) = x \cdot \frac{1}{1+e^{-\beta x}}$
+
+* $\sigma(x)$ — output of Swish activation function
+* $x$ — input to function
+* $\beta$ — a trainable parameter
+
+::: {.callout-tip} 
+If we were to set $\beta$ to 1, Swish becomes the Sigmoid Linear Unit (SiLU) function. 
+:::
+
+While Swish appears similar to ReLU it differs by being *self-gated*, meaning it adaptively adjusts its shape based on the characteristics of your data. Specifically, when $\beta$ is 0, Swish is essentially a linear function $\sigma(x) = x$, but when $\beta$ is large, Swish approximates ReLU $\sigma(x) = x \cdot (x > 0)$. The trade-off is that this adds an extra parameter to each neuron, increasing computational demand and risking overfitting.
+
+```{python}
+#| label: Plot of Swish Function and Derivative
+#| message: false
+#| echo: true
+#| eval: true
+
+class Swish(nn.Module):
+    def __init__(self, beta=1.0):
+        super().__init__()
+        self.beta = nn.Parameter(torch.tensor(beta))
+
+    def forward(self, x):
+        return x * torch.sigmoid(self.beta * x)
+
+swish_fn = Swish(beta=1.0)
+
+plot_activation_fn_and_derivative(swish_fn, x, xlabel='x', ylabel='Swish(x)', title='Swish Activation Function')
+```
+
+Similarly ReLU, Swish is unbounded above, meaning that for large positive values gradients do not become 0. It is also bounded below, with the output tending to *some* constant as values approach negative infinity. This allows Swish to 'forget' very large negative values, which are usually deactivations, which helps regularise a model. Unlike monotonic functions, Swish varies direction in the negative region. This non-monotonicity enhances a model's information storage and discriminative capacity, as its mix of positive and negative derivatives boosts expressivity.
+
+It does this by taking inspiration from LSTMs self-gated function. Like LSTM's sigmoid gates, Swish uses sigmoid to control information flow to the next layer. In activation, a value remains the same, but in deactivation, it's reduced by multiplying with the sigmoid of the value. Self-gating uses one scalar input, unlike multi-gating requiring two. 
+
+Swish is also smooth, unlike ReLU's abrupt change near 0. This smoother transition results in a less oscillatory loss function, promoting faster convergence and better generalisation. A disadvantage here, is that it is more computationally expensive than ReLU, but it remains a useful alternative in hidden layers. 
+
+::: {.callout-note}
+## More trainable activation function
+There are a plethora of activation functions in pytorch we could you that you can look over here: <https://pytorch.org/docs/stable/nn.html#non-linear-activations-weighted-sum-nonlinearity>
+There is also the option to make your own. 
+
+## A note on weight initialisation
+You may have noticed that we haven't specified how our network's weights are initialised before training. PyTorch handles this for us with sensible defaults: Kaiming initialisation for layers followed by ReLU (which accounts for the fact that half the inputs are zeroed out), and Xavier initialisation for sigmoid and tanh (which keeps variance stable across layers). These defaults work well for the networks we build in this chapter. Weight initialisation becomes more important with deeper architectures, and we'll revisit it when we encounter those in later chapters.
+:::
+
+### Comparing Activation functions
+
+Having covered theory, it's time to see how different activation functions influence performance with a basic experiment. We'll take our FFN from the previous chapter, wrap it as a Lightning module, and add a parameter to test various activation functions. We'll then run our model with each activation function and compare results.
+
+First, we'll prepare our data. Let's load the airline passengers dataset, apply a sequential train-validation-test split, scale with min-max normalisation, and create windowed input-target pairs:
+
+```{python}
+#| label: Data preparation for activation function comparison
+#| message: false
+#| echo: true
+#| eval: true
+
+np.random.seed(42)
+
+data = pd.read_csv(CFG.data_folder / 'passengers.csv')
+data['date'] = pd.to_datetime(data['date'])
+data.set_index('date', inplace=True)
+
+train_size = int(len(data) * 0.6)
+val_size = int(len(data) * 0.2)
+train, val, test = data[:train_size], data[train_size:train_size + val_size], data[train_size + val_size:]
+
+scaler = MinMaxScaler()
+train_scaled = scaler.fit_transform(train)
+val_scaled = scaler.transform(val)
+test_scaled = scaler.transform(test)
+
+def create_time_windows(data, window_size):
+    inputs = []
+    targets = []
+    for i in range(len(data) - window_size):
+        inputs.append(data[i:i+window_size])
+        targets.append(data[i+window_size])
+    return np.array(inputs), np.array(targets)
+
+window_size = 12
+
+train_inputs, train_targets = create_time_windows(train_scaled, window_size)
+val_inputs, val_targets = create_time_windows(val_scaled, window_size)
+test_inputs, test_targets = create_time_windows(test_scaled, window_size)
+
+x_train = torch.FloatTensor(train_inputs)
+y_train = torch.FloatTensor(train_targets)
+x_val = torch.FloatTensor(val_inputs)
+y_val = torch.FloatTensor(val_targets)
+x_test = torch.FloatTensor(test_inputs)
+y_test = torch.FloatTensor(test_targets)
+```
+
+Then we define our Lightning data module, our FFN architecture (with a configurable activation function), and a trainable Swish class:
+
+```{python}
+#| label: FFN and data module for activation function comparison
+#| message: false
+#| echo: true
+#| eval: true
+
+class TimeSeriesDataModule(L.LightningDataModule):
+    def __init__(self, train_data, val_data, test_data, batch_size=64):
+        super().__init__()
+        self.train_data = train_data
+        self.val_data = val_data
+        self.test_data = test_data
+        self.batch_size = batch_size
+
+    def setup(self, stage=None):
+        self.train_dataset = TensorDataset(*self.train_data)
+        self.val_dataset = TensorDataset(*self.val_data)
+        self.test_dataset = TensorDataset(*self.test_data)
+
+    def train_dataloader(self):
+        return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=False)
+
+    def val_dataloader(self):
+        return DataLoader(self.val_dataset, batch_size=self.batch_size, shuffle=False)
+
+    def test_dataloader(self):
+        return DataLoader(self.test_dataset, batch_size=self.batch_size, shuffle=False)
+
+class ffnetwork(L.LightningModule):
+    def __init__(self, input_dim, hidden_dim, activation_func, output_dim=1, learning_rate=0.0001):
+        super(ffnetwork, self).__init__()
+        self.fc1 = nn.Linear(input_dim, hidden_dim)
+        self.activation = activation_func
+        self.fc2 = nn.Linear(hidden_dim, output_dim)
+        self.learning_rate = learning_rate
+
+    def forward(self, x):
+        x = x.squeeze(-1)
+        x = self.fc1(x)
+        x = self.activation(x)
+        x = self.fc2(x)
+        return x
+
+    def training_step(self, batch, batch_idx):
+        x, y = batch
+        y_hat = self.forward(x)
+        loss = nn.functional.mse_loss(y_hat, y)
+        self.log('train_loss', loss)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        x, y = batch
+        y_hat = self.forward(x)
+        loss = nn.functional.mse_loss(y_hat, y)
+        self.log('val_loss', loss)
+
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+        return optimizer
+
+class swish(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.beta = nn.Parameter(torch.tensor(1.0))
+
+    def forward(self, x):
+        return x * torch.sigmoid(self.beta * x)
+``` 
+
+After setting up our data, model, training process, and activation functions, we define our hyperparameters. Here we have selected some typical values; to get a sense of what these parameters do it is always a good idea for us to test multiple values. 
+
+```{python}
+#| label: Hyperparameters and activation function dictionary
+#| message: false
+#| echo: true
+#| eval: true
+
+input_dim = 12  
+hidden_dim = 50 
+output_dim = 1
+learning_rate = 0.0001
+
+batch_size = 64
+data_module = TimeSeriesDataModule(train_data=(x_train, y_train),
+                                   val_data=(x_val, y_val),
+                                   test_data=(x_test, y_test),
+                                   batch_size=batch_size)
+
+activations = {
+    'ReLU': nn.ReLU(),
+    'Sigmoid': nn.Sigmoid(),
+    'Tanh': nn.Tanh(),
+    'LeakyReLU': nn.LeakyReLU(0.01),
+    'Swish': swish()
+}
+``` 
+
+Next we define a training loop with early stopping (patience = 10) that iterates through each activation function: 
+
+```{python}
+#| label: Model training with multiple activation functions 
+#| message: false
+#| echo: true
+#| eval: true
+
+results = {}
+for name, activation_func in activations.items():
+    print(f"Training with {name} activation...")
+
+    torch.manual_seed(42)
+    torch.cuda.manual_seed(42)
+
+    model = ffnetwork(input_dim, hidden_dim, activation_func, output_dim, learning_rate)
+    
+    early_stop_callback = EarlyStopping(monitor='val_loss', patience=10, verbose=False)
+
+    trainer = L.Trainer(max_epochs=2000, callbacks=[early_stop_callback])
+    trainer.fit(model, data_module)
+
+    model.eval()
+    last_window = x_val[-1].view(1, -1)
+    recursive_preds = []
+
+    for _ in range(len(x_test)):
+        with torch.no_grad():
+            pred = model(last_window)
+        recursive_preds.append(pred.item())
+        last_window = torch.cat((last_window[:, 1:], pred.view(1, 1)), dim=1)
+
+    unscaled_predictions = scaler.inverse_transform(np.array(recursive_preds).reshape(-1, 1))
+    results[name] = unscaled_predictions
+
+    del model
+    torch.cuda.empty_cache()
+``` 
+
+::: {.callout-note}
+## Recursive forecasting
+The prediction approach we use throughout this chapter is *recursive* (also called autoregressive) forecasting. We seed our model with the last known window from our validation set, predict one step ahead, then roll the window forward by appending that prediction and dropping the oldest value. This is repeated for the length of our test set. It's a natural approach for univariate models, but be aware that errors accumulate with each step, a poor early prediction shifts the entire input window, and subsequent predictions compound drift. We'll revisit forecasting strategies in more detail in later chapters, but for now this approach serves us well for comparing architectural choices on a level playing field.
+:::
+
+Finally, we'll plot our results:
+
+```{python}
+#| label: Plot for each activation function 
+#| message: false
+#| echo: true
+#| eval: true
+
+plt.figure(figsize=(CFG.img_dim1, CFG.img_dim2))
+for idx, (name, preds) in enumerate(results.items()):
+    test_index = data.index[-len(preds):]
+    plt.plot(test_index, preds, label=f'{name}', color=custom_palette[idx + 1], linewidth=2.0)
+
+plt.plot(data.index, data['passengers'], label='Actual', color=custom_palette[0], linewidth=2.0)
+plt.title('Airline Passengers - Predictions with Different Activation Functions')
+plt.legend()
+plt.show()
+```
+
+Our plotted predictions suggest that ReLU appears to help our FFN create a better forecast for this dataset, which is reflected in the metrics we have used here; RMSE (and MSE) but not MAE (swish does better slightly). ReLU does not achieve the lowest error for all datasets; selection may vary with neural architecture, hyperparameters, time/compute cost and crucially, as always, your data. We demonstrate this further in the [notebook](@das_buch/notebooks_packt_repo/chapter6_optimisation.ipynb) with our M5 subset . Activation functions have a significant impact on even the simplest neural network designs, and it is worth conducting experiments before making a choice. 
+
+```{python}
+#| label: Accuracy table for each activation function 
+#| message: false
+#| echo: false
+#| eval: true
+
+unscaled_actuals = scaler.inverse_transform(y_test.numpy().reshape(-1, 1))
+
+errors = {'Activation': [], 'MAE': [], 'MSE': [], 'RMSE': [], 'MAPE': [], 'sMAPE': []}
+
+for name, preds in results.items():
+    mae_val = mean_absolute_error(unscaled_actuals, preds)
+    mse_val = mean_squared_error(unscaled_actuals, preds)
+    rmse_val = rmse(unscaled_actuals, preds)
+    mape_val = mape(unscaled_actuals, preds)
+    smape_val = smape(unscaled_actuals, preds)
+
+    errors['Activation'].append(name)
+    errors['MAE'].append(mae_val)
+    errors['MSE'].append(mse_val)
+    errors['RMSE'].append(rmse_val)
+    errors['MAPE'].append(mape_val)
+    errors['sMAPE'].append(smape_val)
+
+fcst_err_df = pd.DataFrame(errors)
+print(fcst_err_df)
+```
+
+| Activation |       MAE |          MSE |       RMSE |      MAPE |     sMAPE |
+| ---------- | --------: | -----------: | ---------: | --------: | --------: |
+| ReLU       | 63.202089 |  5580.584110 |  74.703307 | 13.868372 | 13.237820 |
+| Sigmoid    | 94.374972 | 13336.849200 | 115.485277 | 18.443492 | 21.068519 |
+| Tanh       | 66.534065 |  6673.879197 |  81.693814 | 13.464732 | 14.810079 |
+| LeakyReLU  | 66.207058 |  6830.479637 |  82.646716 | 14.515465 | 13.561442 |
+| Swish      | 61.119099 |  5684.264051 |  75.394058 | 13.223443 | 12.516499 |
+
+::: {.callout-warning}
+Airline passengers dataset is unusually clean, with strong trend, regular seasonality, no missing data, no exogenous variables. We also have not modelled on residuals here, which is often worth considering when building models.
+
+On messier real-world data, the differences between activation functions (and all the other architectural choices in this chapter) can be more pronounced, and rankings may well shift. The chapter notebook extends some experiments to a subset of the M5 competition dataset, but in reality everything is dependent on your data and its quality. One question people rarely ask is can it even be forecasted? You'd be surprised how often the answer to that question is no.
+:::
+
+
+## Hidden layers 
+
+Another critical architecture element is the number of hidden layers. Obviously you won't be using the 96 layers that an LLM like GPT-3 uses, but extra layers can help disentangle patterns in your data. Again, for simplicity we use the airline passengers dataset to demonstrate here; for more complex experimentation visit the chapter notebook on optimisation. We can test this with a few changes to our architecture; making ReLU our default activation function, and allowing hidden layers to be changed programmatically.  
+
+```{python}
+#| label: FFN setup for multi-layer testing
+#| message: false
+#| echo: true
+#| eval: true
+
+class ffnetwork(L.LightningModule):
+    def __init__(self, input_dim, hidden_dim, num_layers=1, output_dim=1, learning_rate=0.0001, activation_func=nn.ReLU()):
+        super(ffnetwork, self).__init__()
+        self.layers = nn.ModuleList()
+        self.layers.append(nn.Linear(input_dim, hidden_dim))
+        for _ in range(num_layers - 1):
+            self.layers.append(nn.Linear(hidden_dim, hidden_dim))
+        self.layers.append(nn.Linear(hidden_dim, output_dim))
+        self.activation = activation_func
+        self.learning_rate = learning_rate
+
+    def forward(self, x):
+        x = x.squeeze(-1)
+        for i in range(len(self.layers) - 1):
+            x = self.activation(self.layers[i](x))
+        x = self.layers[-1](x)
+        return x
+
+    def training_step(self, batch, batch_idx):
+        x, y = batch
+        y_hat = self.forward(x)
+        loss = nn.functional.mse_loss(y_hat, y)
+        self.log('train_loss', loss)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        x, y = batch
+        y_hat = self.forward(x)
+        loss = nn.functional.mse_loss(y_hat, y)
+        self.log('val_loss', loss)
+
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+        return optimizer
+```
+
+For this experiment we simply run the model with different numbers of layers...
+
+```{python}
+#| label: Testing multiple layers with FNN
+#| message: false
+#| echo: true
+#| eval: true
+
+results = {}
+hidden_layer_configs = range(1, 7)
+
+for num_layers in hidden_layer_configs:
+    print(f"Training model with {num_layers} hidden layers...")
+
+    torch.manual_seed(42)
+    torch.cuda.manual_seed(42)
+
+    model = ffnetwork(input_dim, hidden_dim, num_layers=num_layers, output_dim=output_dim, learning_rate=learning_rate)
+
+    early_stop_callback = EarlyStopping(monitor='val_loss', patience=10, verbose=False)
+    trainer = L.Trainer(max_epochs=2000, callbacks=[early_stop_callback])
+    trainer.fit(model, data_module)
+
+    model.eval()
+    last_window = x_val[-1].view(1, -1)
+    recursive_preds = []
+
+    for _ in range(len(x_test)):
+        with torch.no_grad():
+            pred = model(last_window)
+        recursive_preds.append(pred.item())
+        last_window = torch.cat((last_window[:, 1:], pred.view(1, 1)), dim=1)
+
+    unscaled_predictions = scaler.inverse_transform(np.array(recursive_preds).reshape(-1, 1))
+    results[f'{num_layers} layers'] = unscaled_predictions
+
+    del model
+    torch.cuda.empty_cache()
+```
+
+As we can see below, the number of hidden layers has a significant impact on forecast accuracy, with a few extra layers improving performance before it decreases with four layers. Although 5-layers shows improvment again, this, in these cases Occam's Razor should be applied especially if the differences are marginal.
+
+```{python}
+#| label: Impact of multiple layers on modelling
+#| message: false
+#| echo: true
+#| eval: true
+
+plt.figure(figsize=(CFG.img_dim1, CFG.img_dim2))
+for idx, (name, preds) in enumerate(results.items()):
+    test_index = data.index[-len(preds):]
+    plt.plot(test_index, preds, label=f'{name}', color=custom_palette[idx + 1], linewidth=2.0)
+
+plt.plot(data.index, data['passengers'], label='Actual', color=custom_palette[0], linewidth=2.0)
+plt.title('Airline Passengers - Predictions with Different Numbers of Hidden Layers')
+plt.legend()
+plt.show()
+```
+
+```{python}
+#| label: Impact of number of hidden layers on accuracy 
+#| message: false
+#| echo: false
+#| eval: true
+
+
+errors = {'Model': [], 'MAE': [], 'MSE': [], 'RMSE': [], 'MAPE': [], 'sMAPE': []}
+
+for name, preds in results.items():
+    mae_val = mean_absolute_error(unscaled_actuals, preds)
+    mse_val = mean_squared_error(unscaled_actuals, preds)
+    rmse_val = rmse(unscaled_actuals, preds)
+    mape_val = mape(unscaled_actuals, preds)
+    smape_val = smape(unscaled_actuals, preds)
+
+    errors['Model'].append(name)
+    errors['MAE'].append(mae_val)
+    errors['MSE'].append(mse_val)
+    errors['RMSE'].append(rmse_val)
+    errors['MAPE'].append(mape_val)
+    errors['sMAPE'].append(smape_val)
+
+fcst_err_df = pd.DataFrame(errors)
+print(fcst_err_df)
+```
+
+| Model    |       MAE |         MSE |      RMSE |      MAPE |     sMAPE |
+| -------- | --------: | ----------: | --------: | --------: | --------: |
+| 1 layers | 63.202089 | 5580.584110 | 74.703307 | 13.868372 | 13.237820 |
+| 2 layers | 45.515614 | 2869.036939 | 53.563392 |  9.332868 |  9.688681 |
+| 3 layers | 56.687399 | 4082.960045 | 63.898044 | 11.984523 | 12.024014 |
+| 4 layers | 58.790394 | 6021.330113 | 77.597230 | 11.356693 | 12.349161 |
+| 5 layers | 46.014103 | 3555.361974 | 59.626856 |  9.261752 |  9.535999 |
+| 6 layers | 50.953759 | 4317.074975 | 65.704452 | 10.032113 | 10.695182 |
+
+You can use a similar approach to work through other architectural parameters, such as nodes (which we have discussed previously) and kernel sizes (specifically for CNNs). Doing so individually gives us some idea of what parameter values we might limit ourselves to, and some idea of their effect on models. The problem with these experiments is that, while tuning individual hyperparameters can help reduce options, it does not always reflect the optimal architectural parameters. This is because the parameters work in tandem with other hyperparameters, such as learning rate, regularisation, dropout, iterations, and batch size. Not to mention the random process that affects reproducibility; while writing this I forgot to set the seed, resulting in completely different accuracy metrics for each layer on a second run! 
+
+Typically the best approach to finding bounds for hyperparameter tuning is to:
+
+1. **Review the literature:** look at papers, GitHub code, Kaggle notebooks, and books to see what practitioners are using for similar challenges and data patterns. 
+2. **Apply heuristics:** use rules of thumb from experience and community best practices.    
+3. **Experiment:** test on your own data.
+
+## Architecture optimisation summary
+
+Research around neural network design often emphasises learning algorithms and architectural design, neglecting the impact of activation functions. But in practice, the choice of activation function greatly influences the performance of neural networks, playing a crucial role in convergence of learning @das.gomesComparisonNewActivation2011. Clearly, the number of nodes and layers also have a strong impact on performance, as does the choice of optimisation algorithm. These parameters interact with one another, so while testing them individually can help narrow the search space, tuning them together is ultimately what produces the best results.    
+
+## Gradient Descent, Cost/Loss Functions, and Regularization Techniques
+
+Our next focus for optimisation is the selection and tuning of network optimisers, such as Stochastic Gradient Descent (SGD), Adam, and RMSprop. These optimisation algorithms are concerned with minimising an objective function, typically a loss function (e.g. MSE), computed on your training dataset. Their role is to update model parameters (weights and biases) in a direction that reduces training error. This is not equal to the goal of statistical inference, which is to reduce the generalisation error of a model. These goals are to some extent in opposition with one another; optimising for immediate accuracy can negatively affect long-term predictiveness by causing us to overfit models to the data.   
+
+### Loss functions
+
+The loss function (also called a cost function or objective function) is what our optimiser is trying to minimise. Throughout this chapter we use MSE, which is the default for most regression tasks, but it is worth understanding why and when you might choose differently.
+
+$$
+\text{MSE} = \frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2
+$$
+
+MSE penalises large errors heavily because of the squaring, a prediction that is off by 10 contributes 100 to our loss, while one that is off by 2 contributes only 4. This makes MSE a good choice when large errors are particularly undesirable, which is often the case in forecasting scenarios where a big miss can mean stockouts or excess inventory.
+
+Mean Absolute Error (MAE) is a simpler alternative:
+
+$$
+\text{MAE} = \frac{1}{n}\sum_{i=1}^{n}|y_i - \hat{y}_i|
+$$
+
+MAE treats all errors proportionally and is more robust to outliers, since it doesn't amplify large deviations. If your data has occasional spikes or anomalies that you don't want to dominate the training signal, MAE can be a better choice. In PyTorch, swapping is straightforward
+
+```{python}
+#| label: Loss function comparison
+#| message: false
+#| echo: true
+#| eval: false
+
+# MSE loss (default throughout this chapter)
+loss = nn.functional.mse_loss(y_hat, y)
+
+# MAE loss
+loss = nn.functional.l1_loss(y_hat, y)
+
+# Huber loss, combines MSE and MAE, with a threshold delta
+loss = nn.functional.huber_loss(y_hat, y, delta=1.0)
+```
+
+Huber loss is a useful middle ground, it behaves like MSE for small errors (below `delta` threshold) and like MAE for large errors, giving you sensitivity to small deviations without letting outliers dominate training. In practice, MSE is a safe default for most forecasting tasks, but if you find your model is chasing outliers or producing erratic predictions, switching to Huber or MAE is one of the first things to try.
+   
+To illustrate loss optimisation, we can represent the underlying function of some data as $f$ and the observed function $f_d$, which is not as smooth due to the noise inherent in collected data. In the plot below we are looking for the minimal value. We can see that the minimum of $f_d$ is shifted to the right of the minimum of $f$ — the function we are actually trying to generalise towards. This is adapted from [Dive into Deep Learning](https://d2l.ai/chapter_optimization/optimization-intro.html).    
+
+
+```{python}
+#| label: Function and observed data
+#| message: false
+#| echo: true
+#| eval: true
+
+def f(x):
+    return x * torch.cos(np.pi * x) + 2
+def fd(x):
+    return f(x) + 0.3 * torch.cos(6 * np.pi * x)
+
+x = torch.arange(0.5, 1.5, 0.01)
+
+plt.figure(figsize=(CFG.img_dim1, CFG.img_dim2))
+plt.plot(x, f(x), label='f (generalisation)', color=custom_palette[1])  
+plt.plot(x, fd(x), label='fd (training)', color=custom_palette[2])  
+plt.xlabel('x')
+plt.ylabel('Value')
+plt.legend()
+plt.show()
+```
+
+
+Optimisation algorithms encounter a number of issues we should be aware of: local minima, saddle points, and vanishing gradients. Let's imagine we are minimising the error of a model and we plot it. We can see a 'ditch' at around 0.8, which we refer to as a local minimum, but the lowest value of the function is the global minimum, where we want our optimisation algorithm to reach.The problem we encounter when training neural networks is that the loss surfaces we have to navigate often contain many local optima in which optimisation algorithms can become stuck. This occurs because optimisation algorithms are attempting to minimize/optimise your objective locally instead of globally. There are ways to deal with this, with the simplest approach being to just add some noise to the optimisers weight changes, which may help an optimiser (i.e. minibatch stochastic) get out of a local ditch/minima. 
+
+
+```{python}
+#| label:  Local minima
+#| message: false
+#| echo: true
+#| eval: true
+def fd(x):
+    return f(x) + 0.3 * torch.cos(4 * np.pi * x)
+
+plt.figure(figsize=(CFG.img_dim1, CFG.img_dim2))
+plt.plot(x, fd(x), label='fd (training)', color=custom_palette[2])  
+plt.xlabel('x')
+plt.ylabel('Value')
+plt.legend()
+plt.show()
+```
+
+A related issue is saddle points, where the gradient is zero but the point is neither a maximum nor a minimum. At a saddle point, we see a surface curving upward in some directions and downward in others, which can cause gradient-based optimisers to stall because gradient signals become very small.
+
+![Saddle point: the surface curves upward along the x-axis (descent) and downward along the y-axis (ascent), creating a point where the gradient is zero but no minimum exists.](images/chap6_images/saddle_point.png){fig-align="centre" fig-alt="Figure 6.4: 3D surface plot and contour plot of a saddle point function f(x,y) = x² - y²"}
+
+Optimisation algorithms are a large research area within deep learning, but in terms of application we typically use those provided by [PyTorch optim](https://pytorch.org/docs/stable/optim.html), which includes the most common optimisers. Of these you will find the following used most often: 
+
+* Stochastic gradient descent (SGD)
+* Batch gradient descent (GD)
+* Mini-batch gradient descent (MGD) 
+* Adam
+* Adadelta
+* RMSprop
+* Adagrad
+
+The gradient descent algorithms require more tuning, typically of the learning rate, than the adaptive optimisers which adjust learning rate intrinsically as part of the optimisation process. It's useful to know a little about how these algorithms operate if you want to reduce your options and research time. Gradient descent algorithms are largely separated by the amount of data they use to compute the gradient of a function:
+
+* **GD**, or simply gradient descent, uses an entire dataset to perform parameter updates, making it computationally expensive. 
+* **SGD** uses *individual samples* to update parameters, which is faster than GD. But because the model is updated after every single sample, this high variance causes large fluctuations in the objective function during training. This can be advantageous for escaping local minima, but can also lead to getting trapped in one. We can tune the learning rate to reduce oscillations in the objective.       
+  * **MGD** computes gradients on small *batches* of data, resulting in less variation of the objective function compared to SGD. It is generally preferred over other gradient descent methods because of its balance between efficiency and convergence stability. 
+* **Adagrad** adapts learning rates, with smaller updates for frequent features and larger updates for rarer ones. While this allows the optimiser to capture information from rarer features, it can result in vanishing learning rates, where the rate becomes too small too early in training.
+* **Adadelta** improves on Adagrad by using a fixed window of past gradients to avoid vanishing learning rates.
+* **RMSprop** is similar to Adadelta but uses a different approach to managing past gradients. It adjusts learning rates for each parameter dynamically, dividing the learning rate by a running average of the magnitudes of recent gradients for that weight. 
+* **Adam** combines the advantages of Adadelta/RMSprop and momentum. It is currently the default optimiser for most forecasting libraries utilising neural networks. Its advantage is that it works well with sparse data due to its adaptive learning rates, without requiring manual tuning of the global learning rate.
+
+
+Although Adam is generally your go-to, it is not always the best approach. For example, a linear regression is faster to train with SGD than Adam, and even on more complex datasets you will find that a well-tuned learning rate for a gradient descent algorithm can result in a better model or faster training. This is why it is still worth running experiments with different optimisation algorithms. 
+
+We can extend our FFN to accept different optimisers as a parameter. Note that we have also added dropout to this version of the network, which is applied after each hidden layer, but it is set to 0.00, which means it is not used here:
+
+
+```{python}
+#| label:  Updated FFN for comparing optimisers
+#| message: false
+#| echo: true
+#| eval: true
+
+from lightning.pytorch.loggers import CSVLogger
+
+
+class ffnetwork(L.LightningModule):
+    def __init__(self, input_dim, hidden_dim, num_layers=1, output_dim=1, learning_rate=0.0001, dropout_rate=0.00, activation_func=nn.ReLU(), optimizer_name='Adam'):
+        super(ffnetwork, self).__init__()
+        self.layers = nn.ModuleList([nn.Linear(input_dim, hidden_dim)])
+        self.dropout = nn.Dropout(dropout_rate)
+        
+        for _ in range(num_layers - 1):
+            self.layers.append(nn.Linear(hidden_dim, hidden_dim))
+            
+        self.layers.append(nn.Linear(hidden_dim, output_dim))
+        self.activation = activation_func
+        self.learning_rate = learning_rate
+        self.optimizer_name = optimizer_name
+
+    def forward(self, x):
+        x = x.squeeze(-1)
+        for i in range(len(self.layers) - 1):
+            x = self.activation(self.layers[i](x))
+            x = self.dropout(x)
+        x = self.layers[-1](x)
+        return x
+
+    def training_step(self, batch, batch_idx):
+        x, y = batch
+        y_hat = self(x)  
+        loss = nn.functional.mse_loss(y_hat, y)
+        self.log('train_loss', loss)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        x, y = batch
+        y_hat = self(x)  
+        loss = nn.functional.mse_loss(y_hat, y)
+        self.log('val_loss', loss)
+
+    def configure_optimizers(self):
+        optimizers = {
+            'SGD': torch.optim.SGD(self.parameters(), lr=self.learning_rate),
+            'Adam': torch.optim.Adam(self.parameters(), lr=self.learning_rate),
+            'Adadelta': torch.optim.Adadelta(self.parameters(), lr=self.learning_rate),
+            'RMSprop': torch.optim.RMSprop(self.parameters(), lr=self.learning_rate),
+            'Adagrad': torch.optim.Adagrad(self.parameters(), lr=self.learning_rate),
+        }
+        if self.optimizer_name in optimizers:
+            return optimizers[self.optimizer_name]
+        else:
+            raise ValueError(f"Optimizer '{self.optimizer_name}' not recognized.")
+```
+
+Let's run our experiment, training with each optimiser and logging the results:
+
+```{python}
+#| label:  Comparison of optimiser performance
+#| message: false
+#| echo: true
+#| eval: true
+
+# List of optimiser algorithms
+optimizers = ['SGD', 'Adam', 'Adadelta', 'RMSprop', 'Adagrad']  
+results = {}
+for optimizer_name in optimizers:
+    print(f"Training with {optimizer_name} optimizer...")
+
+    torch.manual_seed(42)
+    torch.cuda.manual_seed(42)
+
+    model = ffnetwork(input_dim, hidden_dim, num_layers=2, output_dim=output_dim, learning_rate=0.001, optimizer_name=optimizer_name)
+
+    early_stop_callback = EarlyStopping(
+        monitor='val_loss',
+        patience=10,
+        verbose=False,
+        mode='min'
+    )
+    # Dictionary for logs to be saved
+    log_dir = f'lightning_logs/{optimizer_name}' 
+    logger = CSVLogger("lightning_logs", name=optimizer_name)
+    # Early stopping 
+    trainer = L.Trainer(
+        max_epochs=2000,
+        default_root_dir=log_dir,
+        callbacks=[early_stop_callback],
+        logger=logger # CSV logging of training 
+    )
+    # Train model
+    trainer.fit(model, data_module)
+    # Evaluate model with test data and store predictions for plotting
+    model.eval()
+    last_window = x_val[-1].view(1, -1)
+    recursive_preds = []
+
+    for _ in range(len(x_test)):
+        with torch.no_grad():
+            pred = model(last_window)
+        recursive_preds.append(pred.item())
+        last_window = torch.cat((last_window[:, 1:], pred.view(1, 1)), dim=1)
+    unscaled_predictions = scaler.inverse_transform(np.array(recursive_preds).reshape(-1, 1))
+    results[optimizer_name] = unscaled_predictions
+
+    del model  
+    torch.cuda.empty_cache()
+```
+
+To visualise how these optimisers differ in their search behaviour, we can plot their paths across a known loss surface. The Beale function is a classic test surface with a single global minimum at (3, 0.5) and a complex landscape that challenges gradient-based methods. Each panel below shows how a different optimiser navigates from the same starting point (−1.5, −1.0). Notice how SGD barely moves with a small learning rate, while Adam finds its way to a global minimum. Adagrad makes good progress but approaches from a different angle, and Adadelta struggles to escape the starting region.
+
+![Optimiser paths on the Beale function loss surface. Each panel shows a different optimiser starting from the same point, with the red cross marking the global minimum. Adam reaches it efficiently, while SGD with a small learning rate barely moves.](images/chap6_images/optimiser_loss_landscape.png){fig-align="centre" fig-alt="Figure 6.5: Six-panel comparison of optimiser paths across the Beale function loss surface"}
+
+```{python}
+#| label:  Plot of optimiser impact on forecasting
+#| message: false
+#| echo: false
+#| eval: true
+
+# Plotting results of different optimisers
+line_styles = ['-', '--', '-.', ':']
+style_cycle = itertools.cycle(line_styles)
+colour_cycle = itertools.cycle(custom_palette)
+
+for name, preds in results.items():
+    test_index = data.index[-len(preds):]
+    plt.plot(
+        test_index,
+        preds,
+        label=f'{name}',
+        color=next(colour_cycle),
+        linestyle=next(style_cycle),
+        linewidth=4
+    )
+plt.plot(
+    data.index,
+    data['passengers'],
+    label='Actual',
+    color='black',
+    linewidth=2.0
+)
+plt.title('Airline Passengers - Predictions with Different Optimizers')
+plt.legend()
+plt.show()
+```
+
+A visual inspection, shows us something interesting, Adam performs poorly as does SGD and Adadelta, we know performance varies by architecture, and we didn't tune the learning rate but this is terrible. Why are they so poor? Let's look at the validation loss. 
+
+```{python}
+#| label: Loss epochs
+#| message: false
+#| echo: false
+#| eval: true
+
+optimizers = ['SGD', 'Adam', 'Adadelta', 'RMSprop', 'Adagrad']
+
+base_dir = Path(r"C:\Users\Graeme\Documents\github\tsfwpt\das_buch\lightning_logs")
+
+plt.figure(figsize=(CFG.img_dim1 , CFG.img_dim2))
+
+for opt in optimizers:
+    metrics_path = base_dir / opt / "version_0" / "metrics.csv"
+    df = pd.read_csv(metrics_path)
+
+    # keep rows where validation loss exists
+    val_df = df[df["val_loss"].notna()].copy()
+
+    plt.plot(
+        val_df["epoch"],
+        val_df["val_loss"],
+        label=opt,
+        linewidth=2
+    )
+
+plt.title("Validation Loss by Optimizer")
+plt.xlabel("Epoch")
+plt.ylabel("Validation Loss")
+plt.legend()
+plt.grid(True, alpha=0.3)
+plt.show()
+```
+
+Each optimiser has very different loss curves over epochs. With both Adam and RMSprop stopping at around 30-40 epochs, clearly getting stuck in a local minima. While this works in RMSprop's favour it is catastrophic for Adam, which is reflected in the error metrics.
+
+```{python}
+#| label: Impact of optimisers on accuracy 
+#| message: false
+#| echo: false
+#| eval: true
+
+
+errors = {'Model': [], 'MAE': [], 'MSE': [], 'RMSE': [], 'MAPE': [], 'sMAPE': []}
+
+for name, preds in results.items():
+    mae_val = mean_absolute_error(unscaled_actuals, preds)
+    mse_val = mean_squared_error(unscaled_actuals, preds)
+    rmse_val = rmse(unscaled_actuals, preds)
+    mape_val = mape(unscaled_actuals, preds)
+    smape_val = smape(unscaled_actuals, preds)
+
+    errors['Model'].append(name)
+    errors['MAE'].append(mae_val)
+    errors['MSE'].append(mse_val)
+    errors['RMSE'].append(rmse_val)
+    errors['MAPE'].append(mape_val)
+    errors['sMAPE'].append(smape_val)
+
+fcst_err_df = pd.DataFrame(errors)
+print(fcst_err_df)
+```
+
+| Model    |        MAE |          MSE |       RMSE |      MAPE |     sMAPE |
+| -------- | ---------: | -----------: | ---------: | --------: | --------: |
+| SGD      | 126.722022 | 20841.284405 | 144.365108 | 25.423805 | 29.893697 |
+| Adam     | 110.533553 | 16851.939089 | 129.815019 | 21.923355 | 25.382636 |
+| Adadelta | 244.829587 | 66358.090440 | 257.600641 | 50.839653 | 69.130685 |
+| RMSprop  |  46.301069 |  3253.420483 |  57.038763 |  9.593590 |  9.617378 |
+| Adagrad  |  46.235060 |  2982.060727 |  54.608248 |  9.499967 |  9.728563 |
+
+
+## Optimising hyper paramters
+
+Learning rate is the most important hyperparameter for optimisers, as it influences a model's ability to generalise by affecting how thoroughly networks are adapted to the parameter space. It controls the size of steps taken in the direction of the negative gradient during training, scaling the adjustment of network weights with respect to the loss function. Finding the optimal learning rate is vital for creating a good model, as it helps models overcome local minima, saddle points, and vanishing gradients by moving training in a way that avoids these traps (though it will not resolve issues caused by poor data). 
+
+For a little more depth on optimisation algorithms we recommend reading chapter 12 of [Dive into Deep Learning](https://d2l.ai/chapter_optimization/index.html). 
+
+### Learning rate scheduling
+
+Using a fixed learning rate (LR) for an entire training run is not a good idea. A large LR will make good progress early but may overshoot as your model approaches a minimum, while a rate small enough for fine-grained convergence may be painfully slow at start of training. LR schedulers dynamically adjust LR  rate during training.
+
+The most practical scheduler for forecasting work is `ReduceLROnPlateau`, which monitors a metric (typically validation loss) and reduces the LR when it stops improving. Which compliments early stopping, as the scheduler gives the model a chance to escape a plateau before early stopping terminates training. We can add it to our `configure_optimizers` method
+
+```{python}
+#| label: Learning rate scheduler example
+#| message: false
+#| echo: true
+#| eval: false
+
+def configure_optimizers(self):
+    optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer, mode='min', factor=0.5, patience=5
+    )
+    return {
+        'optimizer': optimizer,
+        'lr_scheduler': {
+            'scheduler': scheduler,
+            'monitor': 'val_loss'
+        }
+    }
+```
+
+Here `factor=0.5` halves learning rate each time validation loss fails to improve for 5 consecutive epochs (`patience=5`). Our scheduler and early stopping work together, with the scheduler reduceing LR to allow finer convergence, if that still doesn't help, early stopping terminates training.
+
+Other common schedulers include cosine annealing, which smoothly decays LR following a cosine curve, and step decay, which reduces LR by a fixed factor at set intervals. For most forecasting tasks, `ReduceLROnPlateau` is a most practical starting point as it adapts to your data rather than requiring you to guess when to reduce LR.
+
+::: {.callout-tip}
+## Learning rate range test
+Before choosing a learning rate, it is worth running a learning rate range test. The idea, proposed by Leslie Smith in 2017, is to train for a short period while gradually increasing your learning rate from a very small value to a large one, and plot loss against learning rate. The optimal starting LR is typically just before the point where loss begins to rise sharply. Lightning makes this simple with `Tuner`:
+
+```{python}
+#| label: Learning rate range test
+#| message: false
+#| echo: true
+#| eval: false
+
+from lightning.pytorch.tuner import Tuner
+
+trainer = L.Trainer(max_epochs=100)
+tuner = Tuner(trainer)
+
+# runs LR range test and updates model.learning_rate
+lr_finder = tuner.lr_find(model, datamodule=data_module)
+
+# plot loss curve
+fig = lr_finder.plot(suggest=True)
+fig.show()
+
+# suggested LR
+print(f"Suggested LR: {lr_finder.suggestion()}")
+```
+
+This is one of the most useful practical tools for setting an initial learning rate before you start tuning other hyperparameters.
+:::
+
+## Other hyperparameters
+
+### Epochs
+The number of times we pass an entire dataset through a neural network during training (epoch) impacts its learning, by affecting the number of opportunities it has to learn patterns from our dataset, which affects the overall accuracy of the model. If we allow a model too few opportunities it can underfit, conversely too many epochs may lead to overfitting which can be over come with regularisation and early stopping, with the latter being especially important. 
+
+The plot below shows this trade-off. Early in training (left region), both training and validation loss are high, as the model is underfitting. As training continues, both losses decrease. Eventually, training loss continues to fall while validation loss begins to rise, the gap between starts widening as a model overfits to training data. Early stopping halts training at the point where validation loss is minimised.
+
+![Training vs validation loss over epochs, showing the underfitting zone (too few epochs), the optimal early stopping point, and the overfitting zone where the gap between training and validation loss widens.](images/chap6_images/epochs_diagram.png){fig-align="centre" fig-alt="Figure 6.6: Training vs validation loss curves showing underfitting, early stopping, and overfitting zones"}
+
+
+### Batch Size
+Batch size is a critical hyperparameter because it affects the number of training samples used to compute gradients for each parameter update. Generally, finding the optimal batch size is a trade-off between gradient estimation accuracy and computational efficiency. Larger batch sizes generally lead to more accurate gradient approximations across a dataset and more stable convergence, with a smoother optimisation trajectory, but they require more memory and can slow each training iteration. Smaller batch sizes allow more frequent parameter updates with less computational cost, though the resulting gradient estimates are noisier. This noise can introduce more variance into the learning process and a more erratic optimisation path, which can help optimisers escape shallow local minima.
+
+Mini-batch approaches to training are fairly common because they utilise moderate batch sizes which provide some noise-reduced averaging whilst allowing reasonably fast iteration times. While there is no universal answer for the ideal batch size, 32 is usually a good starting point for datasets with fewer than 1,000 samples.   
+
+The effect of batch size on training dynamics is shown below. Smaller batches produce noisier gradient estimates, resulting in more erratic loss curves but faster individual updates. Larger batches give smoother convergence at the cost of slower iterations and higher memory usage.
+
+![Effect of batch size on training loss. Small batches (8) show noisy updates, medium batches (32) balance noise and speed, and large batches (128) produce smooth but slow convergence.](images/chap6_images/batch_size_diagram.png){fig-align="centre" fig-alt="Figure 6.7: Three-panel comparison of training loss curves for small, medium, and large batch sizes"}
+
+
+### Dropout
+Dropout is another regularisation technique, which helps to prevent overfitting. We simply provide a float value a between 1 and 0 (e.g. 0.2 tells a network to drop 20% of the nodes and their connections at each training iteration). This creates 'thinned' network architectures; applying this stochastic process promotes distributed and generalised learning across a network, ensuring that no single neuron is solely responsible for predicting specific features. Essentially, dropout breaks down complex co-adaptations among neurons, forcing networks to learn more robust features, which in theory generalise better to held-out data. It is implemented by multiplying neuron activations by a Bernoulli random mask with keep probability $p$. During inference, dropout is not applied; instead, neuron weights are scaled by $p$ to compensate for the increased number of active neurons and prevent shifts in activation magnitudes. 
+
+Figure 6.8 shows how dropout creates a 'thinned' network at each training iteration. On the left, all neurons are active. On the right, dropout with $p = 0.3$ randomly deactivates roughly 30% of hidden neurons (shown in grey), along with their connections. This forces the remaining neurons to learn more distributed representations.
+
+![Dropout applied to a neural network. Left: standard network with all neurons active. Right: with dropout (p = 0.3), randomly selected hidden neurons are deactivated during training.](images/chap6_images/dropout_diagram.png){fig-align="centre" fig-alt="Figure 6.8: Side-by-side comparison of a neural network with and without dropout applied"}
+
+In practice, dropout is applied after each hidden layer in the forward pass. The code below shows how to add it to our FFN:
+
+
+```{python}
+#| label: FFN with dropout added
+#| message: false
+#| echo: true
+#| eval: false
+
+class ffnetwork(L.LightningModule):
+    def __init__(self, input_dim, hidden_dim, num_layers=1, output_dim=1, learning_rate=0.0001, dropout_rate=0.5, activation_func=nn.ReLU()):
+        super(ffnetwork, self).__init__()
+        self.layers = nn.ModuleList([nn.Linear(input_dim, hidden_dim)])
+        self.dropout = nn.Dropout(dropout_rate)
+        
+        for _ in range(num_layers - 1):
+            self.layers.append(nn.Linear(hidden_dim, hidden_dim))
+            
+        self.layers.append(nn.Linear(hidden_dim, output_dim))
+        self.activation = activation_func
+        self.learning_rate = learning_rate
+
+    def forward(self, x):
+        x = x.squeeze(-1)
+        for i in range(len(self.layers) - 1):
+            x = self.activation(self.layers[i](x))
+            x = self.dropout(x)  # Apply dropout after each hidden layer
+        x = self.layers[-1](x)
+        return x
+
+    def training_step(self, batch, batch_idx):
+        x, y = batch
+        y_hat = self.forward(x)
+        loss = nn.functional.mse_loss(y_hat, y)
+        self.log('train_loss', loss)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        x, y = batch
+        y_hat = self.forward(x)
+        loss = nn.functional.mse_loss(y_hat, y)
+        self.log('val_loss', loss)
+
+    def configure_optimizers(self):
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+        return optimizer
+```
+
+Personally I find dropout to be one of the most effective hyperparameters, in terms of improving statistical inference. 
+
+::: {.callout-note}
+Another common regularisation technique is *batch normalisation*, which normalises inputs to each layer to stabilise training. Batch normalisation normalises the inputs to each layer during training, reducing internal covariate shift, which is the change in the distribution of layer inputs as weights are updated. By keeping these distributions more stable, batch normalisation allows higher learning rates and makes training less sensitive to weight initialisation. It also has a mild regularising effect, similar to dropout, because the normalisation statistics computed on each mini-batch introduce noise. We cover batch normalisation in later chapters when we work with deeper architectures where it becomes more important; for the shallow networks in this chapter, dropout and early stopping are generally sufficient.
+:::
+
+### Weight decay
+
+Weight decay is a form of L2 regularisation that penalises large weights by adding a fraction of the squared weight values to the loss function. This discourages a network from relying too heavily on any single connection, which helps prevent overfitting, particularly when we have limited training data. In PyTorch, weight decay is a parameter of the optimiser rather than something we add to model architecture:
+```{python}
+#| label: Weight decay example
+#| message: false
+#| echo: true
+#| eval: false
+
+# Adam with weight decay (L2 regularisation)
+optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate, weight_decay=1e-4)
+
+# AdamW separates weight decay from gradient updates, generally preferred
+optimizer = torch.optim.AdamW(self.parameters(), lr=self.learning_rate, weight_decay=1e-2)
+```
+
+The difference between `Adam` with `weight_decay` and `AdamW` is worth knowing, standard Adam applies weight decay to a gradient before adaptive scaling, which couples the two in ways that can be counterproductive. AdamW decouples them, applying weight decay directly to weights after a gradient step. In practice, AdamW with a weight decay of 0.01 is a sensible default for most forecasting networks. You can include `weight_decay` in your Optuna search space alongside learning rate and dropout to let a tuner find the right balance.
+
+## Data splitting for neural networks
+
+### Why neural networks split differently 
+
+When we are preparing time series data for forecasting modelling, specifically training and hyper parameter tuning, we need to take account of how neural networks work compared to other methods, like gradient boosted decision trees (GBDTs), Multivariate Adaptive Regression Splines (MARS), Support Vector Machines (SVM), etc. Classical machine learning (CML) methods, such as decision trees (DTs), are particularly susceptible to overfitting, especially with smaller datasets. Similarly, fhyperparameters like maximum depth, which produces 'deep trees', can also lead to overfitting, while low or untuned values may result in underfitting. Sensitivity in ML models is exacerbated by their deterministic nature, although there is some randomness in the models (which we can control) they largely provide similar models when provided with the same HPs and data in training. This, amongst other factors, makes cross-validation (CV) strategies (e.g. nested CV) critical for hyperparameter tuning. Given that GBDTs are generally quicker to train than neural networks, nested cross-validation is a more practical choice for evaluating model hyperparameters and their impact on performance.
+
+By contrast, neural networks benefit from several forms of implicit regularisation, including architectural choices and techniques like dropout and early stopping. They also have a stochastic nature, optimisation approaches like mini-batch gradient descent add additional regularisation that helps prevent overfitting. NNs operate in a continuous optimisation landscape, which offers some robustness to minor hyperparameter variations, such as learning rate adjustments. And their capacity to model complex functions allows for decent generalisation, even when not perfectly tuned. Early stopping, guided by validation performance, also serves as an adaptive regularization method. This makes neural networks generally less sensitive to hyperparameter fluctuations, reducing the need for exhaustive cross-validation strategies like those used for modelling with GBDTs.
+
+In essence this means we can split data more simply for neural networks, using a fixed train-validation-test split rather than nested cross-validation. As training neural networks  take longer than other ML methods this saves some computational resource. 
+
+### Approaches to splitting
+
+When working with neural networks for time series forecasting, we typically progress through three stages of data splitting, each serving a different purpose:
+
+**1. Training-validation-test split (hyperparameter tuning).** When establishing hyperparameters for neural networks, we use a fixed training-validation-test split rather than nested cross-validation. Instead of splitting training and validation into multiple folds, we reuse the same split for each hyperparameter set. This is more robust than a simple training-test split for hyperparameter tuning, while being computationally feasible. For example, with a time series of 730 periods (2 years of daily data) and a forecast horizon of 90 periods, we might split our data into approximately 550-90-90, with training set comprising approximately 75% of our data.
+
+![Training-validation-test split](images/chap6_images/train-val-test.png){fig-align="centre" fig-alt="Figure 6.9: Diagram showing training-validation-test split for hyperparameter tuning"}
+
+**2. Training-validation split (final model training).** After identifying your architecture, optimiser, and hyperparameters, you train a model on a larger portion of the data using a training-validation split. There is no separate test set here because hyperparameter selection is already complete. The validation set provides a final performance metric on unseen data that can be compared against the tuning stage.    
+
+![Training-validation split](images/chap6_images/train-val.png){fig-align="centre" fig-alt="Figure 6.10: Diagram showing training-validation split for final model training"}
+
+**3. Full dataset training and fine-tuning.** Once we are confident that our model and its hyperparameters perform as expected, we can train on the full dataset. At this point we're assuming a that our model is trained with optimal hyperparameters and consequently will have its weights and biases well-calibrated, allowing a model to generalise well when given access to all available data. Alternatively, we can fine-tune, rather than rebuilding from scratch, we take an already-trained model and continue training it on new or additional data (e.g. recent pricing or sales data). This allows us to update our model with all available data without starting over.
+
+::: {.callout-note}
+While fine-tuning is a useful approach, especially if our data is stable, our models can drift out of sync with the data it is modelling. It is wise to monitor performance carefully when applying this approach over time.
+:::
+
+![Full dataset training and fine-tuning](images/chap6_images/fine-tune.png){fig-align="centre" fig-alt="Figure 6.11: Diagram showing full dataset training and fine-tuning approach"}
+
+
+## Hyperparameter tuning
+
+There are various approaches to hyperparameter tuning, with the most common being grid search, Bayesian optimisation, and metaheuristics:
+
+* **Grid search** systematically creates and evaluates models for each combination of hyperparameter values specified in a predefined grid. You can do a full grid search (slow!), random search with a selected number of hyperparameters to compare, or more statistical approaches like a Latin hypercube, which attempts to find a plausible set of values within a multidimensional space.    
+* **Bayesian optimisation** models the performance as a function of hyperparameters using a surrogate model, generally a *Gaussian Process*. It selects new hyperparameter values to test, balancing exploration of new areas and exploitation of known good areas.
+* **Metaheuristics** make use of heuristic algorithms to explore the search space. Some common approaches include genetic algorithms, particle swarm optimisation, and ant colony optimisation.  
+
+While these are all decent approaches, metaheuristics tend to be more useful when we are conducting a large number of comparisons @taniComparisonBayesianParticle2024. Grid search has its place too, especially when we want to create generalised but tailored default hyperparameters for large groups of data. However, the tried and tested way to find optimal hyperparameters for individual models is often Bayesian optimisation. 
+
+Optuna (`pip install optuna`) is an excellent tool for this. It uses an objective function to guide hyperparameter optimisation by evaluating performance. Within the objective function, we define a search space with upper and lower bounds for the hyperparameters we want to investigate, along with the model training and evaluation process. Unlike grid search, which exhaustively evaluates all combinations in a predefined grid, Optuna leverages feedback from earlier trials to efficiently navigate search space, focusing on promising regions and avoiding the combinatorial explosion of exhaustive methods. We set up an Optuna experiment with three components:
+
+1. Define an objective function
+2. Create a study object 
+3. Run optimisation process
+
+```
+import optuna
+
+# Define objective function
+def objective(trial):
+    # Define model and hyperparameters
+    # Train and evaluate model
+    # Return evaluation metric
+
+# Create a study object
+study = optuna.create_study(direction='minimize')
+
+# Run optimization process
+study.optimize(objective, n_trials=20)
+```
+
+Under an objective function, we instantiate and fit models with the bounds and categories we wish to investigate. When selecting bounds, you specify a method for selecting values: for example, you can use an integer suggestion, specify categorical values, or use a log-uniform distribution for Optuna to sample from on each trial. After setting up the parameters, you build predictions and score them against an evaluation metric returned by an objective function. Crucially, when we create a study, we instruct Optuna to maximise or minimise an evaluation metric, for forecasting we generally select minimise. Finally, we run our study by calling the `.optimize()` method, which takes our objective function and the number of trials allowed. Below is a more complete example
+
+```{python}
+#| label: Optuna full example  
+#| message: false
+#| echo: true
+#| eval: false
+
+def objective(trial):
+    learning_rate = trial.suggest_float('learning_rate', 0.0001, 0.1, log=True)
+    dropout_rate = trial.suggest_float('dropout_rate', 0.0, 0.3)
+    hidden_dim = trial.suggest_categorical('hidden_dim', [6, 10, 20, 40])
+    num_layers = trial.suggest_int('num_layers', 1, 6)
+
+    model = ffnetwork(input_dim, hidden_dim, num_layers=num_layers, output_dim=output_dim, 
+                      learning_rate=learning_rate, dropout_rate=dropout_rate)
+
+    early_stop_callback = EarlyStopping(monitor='val_loss', patience=10, verbose=False, mode='min')
+    trainer = L.Trainer(max_epochs=100, callbacks=[early_stop_callback], 
+                        logger=False, enable_checkpointing=False)
+
+    trainer.fit(model, data_module)
+
+    model.eval()
+
+    last_window = x_val[-1].view(1, -1)
+    recursive_preds = []
+    for _ in range(len(x_test)):
+        with torch.no_grad():
+            pred = model(last_window)
+        recursive_preds.append(pred.item())
+        last_window = torch.cat((last_window[:, 1:], pred.view(1, 1)), dim=1)
+
+    recursive_preds = np.array(recursive_preds).reshape(-1, 1)
+    y_test_np = y_test.numpy().reshape(-1, 1)
+    mse_val = np.mean((recursive_preds - y_test_np) ** 2)
+
+    trial.set_user_attr("MSE", mse_val)
+    
+    return mse_val
+
+study = optuna.create_study(direction='minimize')
+study.optimize(objective, n_trials=20)
+
+# Extract best results
+print(f"Best hyperparameters: {study.best_params}")
+print(f"Best MSE: {study.best_value:.4f}")
+```
+
+You could, of course, run hyperparameter tuning on everything at once, but the feasibility of this really depends on the number of models you have to train. The notebook for this chapter conducts experiments on a wider range of data for a subset of the M5 dataset, using Nixtla's MLP in NeuralForecast, running this will give you a sense of the time involved in hyperparameter tuning. You'll tend to find that developing good subject knowledge and testing on your own data is the best approach to learning and understanding.    
+
+## Summary
+
+We have covered optimisation in general in this chapter, and it is important to highlight that there is some nuance in applying optimisation to different neural architectures. For example, with dropout we apply it to nodes in any layer of an FFN/MLP, but with LSTMs we typically apply dropout only when we have more than one layer. You will develop your understanding by experimenting with network designs and building experiments. Of course, for those that just want to forecast, we can use Darts or Nixtla's libraries, but these do have set design choices, even as they make your task easier. 
+
+For those building neural architectures from scratch, we would suggest you optimise in following order: 
+
+1. Architectural elements
+2. Optimisation algorithm
+3. Hyperparameters
+
+This ordering follows the chain of dependency: architectural choices (activation functions, layer counts, node counts) constrain which optimisers make sense, and both architecture and optimiser constrain hyperparameter space worth searching. There is of course crossover between these elements, and separating out experiments prevents one from properly searching  multidimensional space, so if you have time and compute, do everything (within reason)!   
+
+::: {.callout-note}
+## Useful resources 
+* Dropout explained: <https://laid.delanover.com/dropout-explained-and-implementation-in-tensorflow>
+* Dropout paper by Srivastava et al. 2014: <https://jmlr.org/papers/volume15/srivastava14a/srivastava14a.pdf> 
+* Scaling up Optuna with Ray Tune: <https://medium.com/optuna/scaling-up-optuna-with-ray-tune-88f6ca87b8c7> 
+* Hyperparameter tuning with Ray Tune and PyTorch: <https://pytorch.org/tutorials/beginner/hyperparameter_tuning_tutorial.html> 
+:::
