@@ -1,29 +1,30 @@
-# Extracted from chapter4_Pytorch_fundementals.qmd
-# Do not edit the source .qmd file directly.
+# =============================================================================
+# Chapter 4: PyTorch Fundamentals
+# =============================================================================
+# Code companion for Chapter 4
+# Covers: tensor construction, operations, memory management, computational
+#         graphs, autograd, backpropagation, simple neural networks
+# =============================================================================
 
-#| label: Chapter 3 libraries
-#| message: false
-#| echo: false
-#| eval: true
-from pathlib import Path
-import pandas as pd
 import numpy as np
+import pandas as pd
+from pathlib import Path
 
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 import lightning as L
 
 import matplotlib.pyplot as plt
-import seaborn as sns
 
-plt.style.use('fivethirtyeight')
+# =============================================================================
+# Setup: palette, rcParams, CFG
+# =============================================================================
 
+custom_palette = ["#000000", "#0072B2", "#D55E00", "#009E73",
+                  "#CC79A7", "#56B4E9", "#E69F00"]
+line_styles = ['-', '--', '-.', ':']
 
-# Define palette
-custom_palette = ["#000000", "#0072B2", "#D55E00","#009E73","#CC79A7", "#56B4E9","#E69F00"]
-
-
-plt.rcParams['figure.figsize'] = (8, 4)
+plt.rcParams['figure.figsize'] = (12, 6)
 plt.rcParams['font.family'] = 'sans-serif'
 plt.rcParams['font.sans-serif'] = ['Source Sans Pro', 'Arial']
 plt.rcParams['font.size'] = 14
@@ -31,24 +32,18 @@ plt.rcParams['axes.labelsize'] = 14
 plt.rcParams['lines.linewidth'] = 2
 plt.rcParams['axes.titlesize'] = 18
 
-# general settings
 class CFG:
-    data_folder = Path.cwd().parent / "data"
+    data_folder = Path.cwd() / "Data"
     img_dim1 = 12
     img_dim2 = 6
     fontsize = 18
-    
-    
-# adjust the parameters for displayed figures    
-plt.rcParams.update({'figure.figsize': (CFG.img_dim1,CFG.img_dim2)})
 
-# ----------------------------------------------------------------------
+plt.rcParams.update({'figure.figsize': (CFG.img_dim1, CFG.img_dim2)})
 
-#| label: Basic tensor construction
-#| message: false
-#| echo: true
-#| eval: true
-import torch
+
+# =============================================================================
+# 4.1  Basic Tensor Construction
+# =============================================================================
 
 scalar = torch.tensor(42, dtype=torch.float32)
 
@@ -62,128 +57,100 @@ tensor_3d = torch.tensor([[[1, 2], [3, 4]],
                           [[5, 6], [7, 8]],
                           [[9, 10], [11, 12]]], dtype=torch.float32)
 
-
 print(scalar)
 print(vector)
 print(matrix)
 print(tensor_3d)
 
-# ----------------------------------------------------------------------
 
-#| label: Tensor with data from random normal distribution
-#| message: false
-#| echo: true
-#| eval: true
+# =============================================================================
+# 4.2  Tensor from Random Normal Distribution
+# =============================================================================
 
 torch.manual_seed(42)
 
-randn_tensor = torch.randn(3,2)
+randn_tensor = torch.randn(3, 2)
 
 print(f'data type \n', type(randn_tensor))
-print(f'within tensor data type \n',randn_tensor.dtype)
+print(f'within tensor data type \n', randn_tensor.dtype)
 print(f'tensor values \n', randn_tensor)
 
-# ----------------------------------------------------------------------
 
-#| label: Tensor Opperations
-#| message: false
-#| echo: true
-#| eval: true
+# =============================================================================
+# 4.3  Tensor Operations
+# =============================================================================
 
 print(f'tensor x tensor \n', randn_tensor.mul(randn_tensor), f'\n')
 print(f'matrix multiplication \n', randn_tensor.matmul(randn_tensor.T))
 print(f'add 1 \n', randn_tensor.add_(1))
 
-# ----------------------------------------------------------------------
-
-#| label: Zero and concat
-#| message: false
-#| echo: true
-#| eval: true
-
-zero_tensor = torch.randn(3,2).zero_()
-concat_tensor = torch.cat([zero_tensor, randn_tensor], dim = 1)
+# Zero and concatenation
+zero_tensor = torch.randn(3, 2).zero_()
+concat_tensor = torch.cat([zero_tensor, randn_tensor], dim=1)
 
 print(f'zero tensor \n', zero_tensor)
 print(f'concatonated tensors \n', concat_tensor)
 
-# ----------------------------------------------------------------------
 
-#| label: CSV to tensor
-#| message: false
-#| echo: true
-#| eval: true
+# =============================================================================
+# 4.4  CSV to Tensor
+# =============================================================================
 
 # Load dataset
 data = pd.read_csv(CFG.data_folder / 'passengers.csv')
 
-# Add a count column 
+# Add a count column
 data['count'] = np.arange(1, len(data) + 1)
 tensor_1_col = torch.tensor(data['passengers'].values, dtype=torch.float32)
 tensor_2_col = torch.tensor(data[['passengers', 'count']].values, dtype=torch.float32)
 
-#print(f'simple univariate tensor', tensor_1_col)
-#print(f'simple multivariate tensor', tensor_2_col)
+# print(f'simple univariate tensor', tensor_1_col)
+# print(f'simple multivariate tensor', tensor_2_col)
 
-# ----------------------------------------------------------------------
 
-#| label: Tensors in memory
-#| message: false
-#| echo: true
-#| eval: true
+# =============================================================================
+# 4.5  Memory Efficiency
+# =============================================================================
 
 torch.manual_seed(42)
 
-A = torch.randn(3,2)
-B = torch.ones(3,2)
+A = torch.randn(3, 2)
+B = torch.ones(3, 2)
 print(f'Orginal location in memory', id(B))
 
 B = A + B
 print(f'New location in memory', id(B))
 
-# ----------------------------------------------------------------------
-
-#| label: Inplace tensor opperations
-#| message: false
-#| echo: true
-#| eval: true
-
-A = torch.randn(3,2)
-B = torch.ones(3,2)
+# Inplace operation preserves memory address
+A = torch.randn(3, 2)
+B = torch.ones(3, 2)
 print('Location in before operation', id(B))
 
 B[:] = A + B
 print('Location in after operation', id(B))
 
-# ----------------------------------------------------------------------
 
-#| label: Function and it's derivative
-#| message: false
-#| fig-cap: "Figure 4.4: Function and derivative"
-#| echo: false
-#| eval: true
+# =============================================================================
+# 4.6  Computational Graphs — Function and Derivative
+# =============================================================================
 
-# Define quadratic function and it's derivative
+# --- Figure 4.4: Function and derivative ---
 def f(x):
     return x ** 2
 
 def df(x):
     return 2 * x
 
-# Generate values of x
 x = np.linspace(-10, 10, 100)
 
-# Plot derivative
 plt.figure(figsize=(10, 6))
-plt.plot(x, f(x), label='f(x) = x^2', color='blue')
-plt.plot(x, df(x), label="f'(x) = 2x", color='orange', linestyle='--')
+plt.plot(x, f(x), label='f(x) = x^2', color=custom_palette[1])
+plt.plot(x, df(x), label="f'(x) = 2x", color=custom_palette[6], linestyle='--')
 
-# Highlight gradient 
 for point in [-7, 0, 7]:
-    plt.scatter(point, f(point), color='red')
+    plt.scatter(point, f(point), color=custom_palette[2])
     plt.text(point, f(point) + 10, f"f'({point}) = {df(point)}", ha='center')
 
-# Annotate the derivative plot
 plt.title('Function and its Derivative')
 plt.xlabel('x')
 plt.ylabel('f(x) and f\'(x)')
@@ -191,14 +158,12 @@ plt.legend()
 plt.grid(True)
 plt.show()
 
-# ----------------------------------------------------------------------
 
-#| label: Simple example of gradient calculation
-#| message: false
-#| echo: true
-#| eval: true
+# =============================================================================
+# 4.7  Autograd — Gradient Calculation
+# =============================================================================
 
-# Define opperations of forward pass 
+# Define operations of forward pass
 def forward_pass(x):
     # Operation 1 - logarithm
     log_x = torch.log(x)
@@ -206,24 +171,22 @@ def forward_pass(x):
     sin_log_x = torch.sin(log_x)
     return sin_log_x
 
-# Instantiate x tensor, setting requires_grad=True in order to track computations
+# Instantiate x tensor, setting requires_grad=True to track computations
 x = torch.tensor([2.0], requires_grad=True)
 
 # Forward pass to compute output
 y = forward_pass(x)
 
-# Backward pass, to compute gradient of y with respect to x
+# Backward pass to compute gradient of y with respect to x
 y.backward()
 
 # Gradient stored in x.grad
 print(f"Gradient of y with respect to x is: {x.grad}")
 
-# ----------------------------------------------------------------------
 
-#| label: Calculating a single NN layer
-#| message: false
-#| echo: true
-#| eval: false
+# =============================================================================
+# 4.8  Single NN Layer
+# =============================================================================
 
 # Definitions - input data, weights, and 'true output' for loss calculation
 input_tensor = torch.tensor([[1.0, 2.0, 3.0]], requires_grad=True)
@@ -240,7 +203,7 @@ loss = (true_output - predicted_output).pow(2).mean()
 # Backward pass with autograd to compute gradients
 loss.backward()
 
-# dict of tensors and gradients  
+# dict of tensors and gradients
 nn_basic_results = {
     "Input Tensor": input_tensor,
     "Weights": weights,
@@ -249,15 +212,13 @@ nn_basic_results = {
     "Gradient with respect to Input Tensor": input_tensor.grad,
     "Gradient with respect to Weights": weights.grad
 }
-# print result
-nn_basic_results
+for k, v in nn_basic_results.items():
+    print(f"{k}: {v}")
 
-# ----------------------------------------------------------------------
 
-#| label: A simple Pytorch model and training loop 
-#| message: false
-#| echo: true
-#| eval: false
+# =============================================================================
+# 4.9  Pure PyTorch NN
+# =============================================================================
 
 # Define neural network
 class SimpleNN(torch.nn.Module):
@@ -275,70 +236,73 @@ model = SimpleNN()
 # Define optimizer
 optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
 
-# Define tensors for input and output 
+# Define tensors for input and output
 input_tensor = torch.tensor([[1.0, 2.0, 3.0]], requires_grad=True)
 true_output = torch.tensor([[0.7, 1.5]])
 
 # Wrap tensors in a DataLoader
 train_loader = DataLoader(TensorDataset(input_tensor, true_output), batch_size=1)
 
-# Training loop
-for epoch in range(1):  
+# Training loop with loss tracking
+num_epochs = 100
+losses = []
+
+for epoch in range(num_epochs):
     for batch in train_loader:
-        # Separate data into inputs and outputs
         inputs, targets = batch
-        # Zero gradients
         optimizer.zero_grad()
-        # Forward pass
         predicted_output = model(inputs)
-        # Compute loss
         loss = torch.mean((targets - predicted_output).pow(2))
-        # Backward pass
         loss.backward()
-        # Update weights
         optimizer.step()
+    losses.append(loss.item())
 
-# ----------------------------------------------------------------------
+print(f"Final loss after {num_epochs} epochs: {losses[-1]:.6f}")
 
-#| label: A simple Pytorch model and training with Lightening
-#| message: false
-#| echo: true
-#| eval: false
 
-import lightning as L
+# =============================================================================
+# 4.10  Lightning NN
+# =============================================================================
 
-class SimpleNN(L.LightningModule):
+class SimpleNNLightning(L.LightningModule):
     def __init__(self):
-        super(SimpleNN, self).__init__()
+        super(SimpleNNLightning, self).__init__()
         self.weights = torch.nn.Parameter(torch.tensor([[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]))
 
     def forward(self, x):
-        # Forward pass 
         return torch.mm(x, self.weights.t()).relu()
 
     def training_step(self, batch, batch_idx):
-        # Forward pass with loss calculation
         x, true_output = batch
         predicted_output = self(x)
         loss = torch.mean((true_output - predicted_output).pow(2))
         return loss
 
     def configure_optimizers(self):
-        # Optimization with SGD
         return torch.optim.SGD(self.parameters(), lr=0.01)
 
-# Instantiate neural network
-model = SimpleNN()
+model_lightning = SimpleNNLightning()
 
-# Define input and output tensors 
 input_tensor = torch.tensor([[1.0, 2.0, 3.0]])
 true_output = torch.tensor([[0.7, 1.5]])
 
-# Wrap data in a DataLoader
 train_loader = DataLoader(TensorDataset(input_tensor, true_output), batch_size=1)
 
-# Define trainer
-trainer = L.Trainer(max_epochs=1)
+# Disable default logging to avoid creating lightning_logs/ folder
+trainer = L.Trainer(max_epochs=200, logger=False, enable_checkpointing=False)
+trainer.fit(model_lightning, train_loader)
 
-# Fit model
-trainer.fit(model, train_loader)
+
+# =============================================================================
+# 4.11  Training Loss Plot
+# =============================================================================
+
+# --- Figure: Training loss over epochs (Pure PyTorch NN) ---
+plt.figure(figsize=(10, 6))
+plt.plot(range(1, num_epochs + 1), losses, color=custom_palette[1], linewidth=2)
+plt.xlabel('Epoch', fontsize=14)
+plt.ylabel('MSE Loss', fontsize=14)
+plt.title('Training Loss: Pure PyTorch SimpleNN', fontsize=16)
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.tight_layout()
+plt.show()
