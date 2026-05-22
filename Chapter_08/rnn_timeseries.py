@@ -6,7 +6,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.19.1
+#       jupytext_version: 1.19.2
 #   kernelspec:
 #     display_name: .venv
 #     language: python
