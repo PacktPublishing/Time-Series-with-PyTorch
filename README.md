@@ -22,3 +22,7 @@ This is the code repository for the book "Time Series with PyTorch" by Packt Pub
     ```
 2. Select the virtual environment created by uv in your IDE or terminal or jupyter.
 
+## Authors of the Book
+
+- [Graeme Davidson](https://github.com/AugustComte)
+- [Lei Ma](https://github.com/emptymalei)
