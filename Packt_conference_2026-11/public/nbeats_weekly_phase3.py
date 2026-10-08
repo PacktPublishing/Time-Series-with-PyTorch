@@ -105,7 +105,6 @@ def add_weekly_cyclic(df: pl.DataFrame) -> pl.DataFrame:
 # ============================================================================
 
 weekly = pl.read_parquet(DATA_DIR / "sales_weekly.parquet")
-clusters = pl.read_parquet(DATA_DIR / "series_features.parquet")
 items = pl.read_csv(DATA_DIR / "items.csv").select(
     ["item_id", "department_id", "class_id", "subclass_id", "item_group_id"]
 )
@@ -146,10 +145,6 @@ n_missing_hier_ids = (
     .item()
 )
 print(f"  Hierarchy join check: {n_missing_hier_ids} weekly item_id(s) without a subclass")
-
-cluster_cols = [c for c in clusters.columns if "cluster" in c.lower() or c == "unique_id"]
-cluster_slim = clusters.select(cluster_cols).unique("unique_id")
-weekly = weekly.join(cluster_slim, on="unique_id", how="left")
 
 # ============================================================================
 # PRICE DATA QUALITY — remove series with corrupt prices
@@ -256,12 +251,9 @@ print("Encoding static covariates...")
 df_pd = weekly.to_pandas()
 df_pd["ds"] = pd.to_datetime(df_pd["ds"])
 
-# One-hot: sale_class (A–J) and cluster_label
-ohe_cols = [c for c in ["sale_class", "cluster_label"] if c in df_pd.columns]
-if ohe_cols:
-    df_pd = pd.get_dummies(df_pd, columns=ohe_cols,
-                            prefix=[c.replace("_label", "") for c in ohe_cols],
-                            dtype=np.float32)
+# One-hot: sale_class (A–J)
+if "sale_class" in df_pd.columns:
+    df_pd = pd.get_dummies(df_pd, columns=["sale_class"], prefix="sale_class", dtype=np.float32)
 
 # Cast types
 for col in df_pd.select_dtypes(include=["float64"]).columns:
@@ -290,7 +282,7 @@ FUTR_EXOG_COLS = [c for c in FUTR_EXOG_COLS if c in df_pd.columns]
 
 STATIC_BASE = ["class_id", "subclass_id", "item_group_id"]
 STATIC_OHE  = [c for c in df_pd.columns
-               if c.startswith("sale_class_") or c.startswith("cluster_")]
+               if c.startswith("sale_class_")]
 STATIC_COLS = [c for c in STATIC_BASE + STATIC_OHE if c in df_pd.columns]
 
 for col in STATIC_COLS:
@@ -726,3 +718,4 @@ plt.close()
 
 print(f"\n✓ NBEATSx weekly Phase 3 complete. Results in: {RESULTS_DIR}")
 clear_gpu()
+

@@ -1,6 +1,6 @@
 # Weekly Retail Sales Forecasting Dataset
 
-Weekly unit sales for 18,692 products in a single grocery supermarket, with prices, promotion flags, a product hierarchy and precomputed series features. The data covers 2023-07-05 to 2025-07-16, in weeks that start on Wednesday.
+Weekly unit sales for 18,692 products in a single grocery supermarket, with prices, promotion flags, and a product hierarchy. The data covers 2023-07-05 to 2025-07-16, in weeks that start on Wednesday.
 
 The data has been anonymised:
 
@@ -16,7 +16,6 @@ Sales, prices and dates are unchanged.
 | File | Rows | Description |
 | --- | --- | --- |
 | `data/sales_weekly.parquet` | 1,967,797 | One row per series per week |
-| `data/series_features.parquet` | 18,692 | Time-series features and cluster label per series |
 | `data/items.csv` | 18,692 | Product attributes and hierarchy ids |
 | `data/hierarchy.csv` | 1,483 | Subclass → class → department, with names |
 | `nbeats_weekly_phase3.py` | | Example global model (NBEATSx, NeuralForecast) |
@@ -25,7 +24,6 @@ Sales, prices and dates are unchanged.
 
 ```text
 sales_weekly.unique_id  = "{item_id}_S1"
-series_features.unique_id = sales_weekly.unique_id
 items.item_id           -> parse from unique_id
 items.subclass_id       -> hierarchy.subclass_id
 ```
@@ -66,7 +64,7 @@ items.subclass_id       -> hierarchy.subclass_id
 `nbeats_weekly_phase3.py` trains an NBEATSx global model with:
 
 - price and promotion as future covariates;
-- class, subclass, item group, sales class and cluster as static covariates;
+- class, subclass, item group and sales class as static covariates;
 - a single fit with fixed hyperparameters (no tuning), followed by a price simulation that estimates per-series elasticity.
 
 It holds out the final 14 weeks (from 2025-04-16) for testing and compares against Naive and Seasonal Naive baselines.
