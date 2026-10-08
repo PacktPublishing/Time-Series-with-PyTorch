@@ -306,3 +306,8 @@ Backups.backupdb
 .MobileBackups.trash
 MobileBackups.trash
 tmbootpicker.efi
+
+# Claude Code
+.claude/
+CLAUDE.md
+CLAUDE.local.md
