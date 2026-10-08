@@ -1,0 +1,1484 @@
+subclass_id,subclass_name,class_id,class_name,department_id,department_name
+1,Mixed Vegetables Frozen Food Service,480,Vegetables Frozen Food Service,116,Frozen Food Service
+2,Soft Drink Pet Bottle Singles <= 600ml,299,Soft Drinks,55,Soft Drinks
+3,Standard Formula,96,Formula,27,Baby
+4,Packaged Sundry,442,Packaged Sundry,12,Packaged
+5,Singles Premium,475,Singles,6,Ice Cream
+6,Rice Salads Deli,167,Salads - Deli,38,Delicatessen
+7,Automatic Sprays,448,Air Fresheners / Deodorisers,85,Household Needs
+8,Facial Skincare Wipes,456,Facial Skincare,83,Skincare
+9,Indian Breads,162,Indian Food,70,International Food
+10,Sundry Hardware,184,Hardware,128,Hardware
+11,Sunflower Oil,107,Oils,73,Cooking Needs
+12,Kalamata Olives Deli,160,Olives / Brines Deli,38,Delicatessen
+13,Premium Conditioner,408,Conditioner,66,Hair Care
+14,Vegetable Meal Base,163,Meal Bases,16,Condiments
+15,Gelatine & Junket,431,Baking Needs,73,Cooking Needs
+16,Sundry Pizza - Premium,85,Pizza - Premium,46,Pizza
+17,In-Store Bakery Breads International,370,In-Store Bakery Breads,119,In Store Bakery
+18,Bread Mix,208,Flour & Bread Mix,73,Cooking Needs
+19,Bins / Tidies,437,Bulky Plastic,35,Household Cleaning General Merchandise
+20,Seafood Frozen Value Added Varieties,142,Seafood Frozen,5,Seafood
+21,Adult Cereal / Nut Bars,419,Cereal / Nut Bars,90,Nutritional Snacks
+22,Proprietary Breads Wholemeal,387,Proprietary Breads,36,Proprietary
+23,Fruit Sauce,316,Table Sauces,16,Condiments
+24,Gas Lighter Refill,88,Lighters,56,Matches & Lighter
+25,Bird Treats,40,Small Animal Food,89,Small Animal Food
+26,Everyday Toothpaste,395,Toothpaste,138,Oral Care
+27,Multipack Premium,494,Multipack,6,Ice Cream
+28,Meals Frozen Food Service,1,Dinners Food Service,116,Frozen Food Service
+29,Flavoured Milks,228,Milk & Cream - Long Life,122,Beverages
+30,Meal Canned,61,Canned Meats & Meal,69,Hot & Cold Meals
+31,Laxatives,491,Stomach & Bowel,4,Medicinal
+32,Seafood Frozen Fish Fillet Value Added,142,Seafood Frozen,5,Seafood
+33,Bubble Bath,41,Soap & Bath,71,Soap & Bath
+34,Writing Pads,221,School / Home Stationery,3,Stationery
+35,Fruit Peel,335,Dried Fruit & Nuts,73,Cooking Needs
+36,Digestion,292,Vitamins,52,Vitamins & Supplements
+37,Sundry Vinegars,100,Vinegars,16,Condiments
+38,Sundry Pasta Sauce,196,Pasta Sauce,16,Condiments
+39,Apple Pink Lady,21,Apple,63,Fresh Fruit
+40,Non Alcoholic Beverages Sundry,266,Non Alcoholic Beverages Sundry,24,Non Alcoholic Beverages
+41,Insomnia,292,Vitamins,52,Vitamins & Supplements
+42,Mainstream Dry Dog Food,103,Dry Dog Food,86,Dog Food
+43,Castor Sugar,369,Sugar,73,Cooking Needs
+44,Olives Condiments,74,Pickled Vegetables,16,Condiments
+45,Novelty,345,Christmas - General,39,Seasonal
+46,Pre Packed Cheese Deli,452,Cheese - Deli,38,Delicatessen
+47,Herbal,38,Teas,122,Beverages
+48,Value Add Rissoles & Meatballs Kangaroo,16,Value Add Meat Rissoles & Meatballs,59,Value Add Meat
+49,Frozen Seafood Sundry,86,Frozen Seafood Sundry,51,Frozen Seafood
+50,Manual Liquid,227,Toilet,21,Household Cleaners
+51,Sewing Needs,201,Haberdashery,53,Haberdashery
+52,Seafood Chilled Fish,445,Seafood Chilled,5,Seafood
+53,Deli Sundries Front Rail,82,Deli Sundires,38,Delicatessen
+54,Patches,44,Nicotine Replacement Treatment,4,Medicinal
+55,Energy Drinks Singles Bottle >= 500ml,262,Energy Drinks - Singles,99,Energy Drinks
+56,Value Facial Tissues,463,Facial Tissues,147,Facial Tissues
+57,Beans Canned,212,Vegetables,40,Vegetables & Salads
+58,Watering Aids,28,Garden Hardware,48,Gardening Products
+59,Sundry Fruit - Juice,314,Fruit - Juice,44,Fruit
+60,Gift Wrap,219,Cards & Wrapping,3,Stationery
+61,Rice Arborio,188,Grains,10,Grains & Pasta
+62,Health Margarine,368,Margarine,100,Chilled Spreads
+63,Soy Sauce,316,Table Sauces,16,Condiments
+64,Liquid Breakfast,357,Portable Cereals,93,Breakfast Foods
+65,Cough & Cold Drinks,130,Cough & Cold,4,Medicinal
+66,Medicated Single,110,Medicated,121,Confectionery
+67,Countlines Single,272,Sugar - Bags,121,Confectionery
+68,Value Add Sausages Kangaroo,5,Value Add Meat Sausages,59,Value Add Meat
+69,Sundry Dressings & Mayonnaises,15,Dressings & Mayonnaises,16,Condiments
+70,Antipasto Deli,160,Olives / Brines Deli,38,Delicatessen
+71,Tablets / Capsules / Caplets Sinus & All,398,Sinus & Allergy,4,Medicinal
+72,Whitening Toothpaste,395,Toothpaste,138,Oral Care
+73,Body Care Lotion,413,Body Care,83,Skincare
+74,Garlic Local Pre Pack,48,Garlic,127,Hard Produce
+75,Xmas Chocolates,10,Xmas Seasonal,125,Seasonal Lines
+76,Cold Desserts Cheesecake,183,Cold Desserts,115,Frozen Desserts
+77,Pork Legs Retail Ready Boneless,479,Pork Legs,74,Pork
+78,Powder,3,Toiletries,27,Baby
+79,Mandarin,249,Citrus Fruits,63,Fresh Fruit
+80,All Purpose Cream,458,All Purpose,21,Household Cleaners
+81,Clingwraps Food Service,63,Foil & Wraps Food Service,88,Non Foods Food Service
+82,Sundry Seasonal Events,313,Seasonal Events,39,Seasonal
+83,Sundry Automotive Lubricants,34,Automotive Lubricants,25,Automotive
+84,Flavoured Greek Yoghurt,388,Greek Yoghurt,134,Yoghurts
+85,Health Food Snacks Savoury,293,Health Food Snacks,17,Health Food
+86,Storage Bins Plastic,437,Bulky Plastic,35,Household Cleaning General Merchandise
+87,In-Store Bakery Breads Rolls,370,In-Store Bakery Breads,119,In Store Bakery
+88,Pork Loin Production Primal,141,Pork Loin,74,Pork
+89,Healthy Milk & Water Modifiers,187,Milk & Water Modifiers,122,Beverages
+90,Bags Jellies,272,Sugar - Bags,121,Confectionery
+91,Sauce-Tomato Sauce Food Service,501,Condiments Food Service,101,Dry Grocery Food Service
+92,Cleaning Materials Sundry,237,Cleaning Materials Sundry,142,Cleaning Materials
+93,Value Add Sundry,26,Value Add Sundry,47,Value Add Produce
+94,Antipasto Condiments,74,Pickled Vegetables,16,Condiments
+95,Women's Pads,333,Pads,30,Incontinence
+96,Floor Polish,132,Polishes,21,Household Cleaners
+97,Economy Wet Dog Food,172,Wet Dog Food,86,Dog Food
+98,Other Seafood Natural,401,Other Seafood,51,Frozen Seafood
+99,<=100g Sliced Meats,55,Sliced Meat Pre-Packed,105,Smallgoods - Pre-Packed
+100,Rice Small,51,Side Dishes,69,Hot & Cold Meals
+101,Home Brewing Sugars & Enhancers,95,Home Brew,80,Home Brew
+102,Fertilisers,321,Gardening,48,Gardening Products
+103,Cous Cous,7,Pasta,10,Grains & Pasta
+104,Poultry Speciality Varieties,423,Poultry Speciality,120,Poultry
+105,Smoked Sliced / Shaved Meats Deli,45,Sliced / Shaved Meats,38,Delicatessen
+106,Meals - Asian,432,Meals - Asian,97,Meals
+107,Cubed Stock,244,Stock,73,Cooking Needs
+108,Sundry Sugar,369,Sugar,73,Cooking Needs
+109,Sundry Stationery,221,School / Home Stationery,3,Stationery
+110,Beans & Ground Coffee Food Service,455,Coffees Food Service,101,Dry Grocery Food Service
+111,Non-Alcoholic Liqueurs,276,Non-Alcoholic Beverages All,24,Non Alcoholic Beverages
+112,Home Brew Hardware & Accessories,95,Home Brew,80,Home Brew
+113,Continental Sundries,150,Continental,38,Delicatessen
+114,Red Wine Vinegars,100,Vinegars,16,Condiments
+115,Sundry Chilled Dog Food,213,Chilled Dog Food,104,Pet Food
+116,Sundry Sauce Bulk Food Service,501,Condiments Food Service,101,Dry Grocery Food Service
+117,Asian Meal Base,163,Meal Bases,16,Condiments
+118,Summer - Cooling Appliances,264,Summer,39,Seasonal
+119,Lubricant Additives,34,Automotive Lubricants,25,Automotive
+120,Gifting Cards,143,Non-Stock Items,23,Non-Stock Items
+121,Standard Black,38,Teas,122,Beverages
+122,Moth Balls / Flakes,36,Insecticides,85,Household Needs
+123,Methylated Spirits,389,Cleaners - Spirits,21,Household Cleaners
+124,Soap & Bath Sundry,49,Soap & Bath Sundry,71,Soap & Bath
+125,Value Added Poultry Frozen Food Service,329,Poultry Frozen Food Service,116,Frozen Food Service
+126,Thickened Cream,207,Cream,62,Cream
+127,Traditional Simmer Sauces,380,Sauces Cooking,16,Condiments
+128,Valentines Day,313,Seasonal Events,39,Seasonal
+129,Travel Sundry,336,Travel Sundry,111,Travel
+130,Pork Trim Mince,274,Pork Trim,74,Pork
+131,Soft Ripened Cheese Deli,452,Cheese - Deli,38,Delicatessen
+132,Men's Moisturiser / Lotions,230,Men's Skincare,137,Mens Grooming
+133,Sundry Frozen Bread & Pastry,180,Frozen Bread & Pastry,112,Frozen Bread & Pastry
+134,Sports Drinks - Powder,409,Sports Drinks - Powder,67,Sports Drinks
+135,Mixed Vegetables Plain,302,Mixed Vegetables,82,Frozen Vegetables
+136,Floor Liquid,270,Floor,21,Household Cleaners
+137,Seafood Frozen Value Added Prawns,142,Seafood Frozen,5,Seafood
+138,Fruit / Sweet Pies Multipack,176,Fruit / Sweet Pies,115,Frozen Desserts
+139,Dips - Premium,9,Dips,19,Dips
+140,Platters Crockery,411,Crockery,8,Housewares
+141,Drain Crystal,223,Drain,21,Household Cleaners
+142,Noodles,420,Noodles - Fresh,2,Pasta - Fresh
+143,Health Supplements,444,Supplements,52,Vitamins & Supplements
+144,Middle Bacon Deli,233,Bacon,38,Delicatessen
+145,Nutritional Snacks Sundry,348,Nutritional Snacks Sundry,90,Nutritional Snacks
+146,Multipack Water Ice,494,Multipack,6,Ice Cream
+147,Peanuts,120,Nuts & Jerky,133,Nuts & Jerky
+148,Pies - Family,209,Pies - Family,124,Quiches & Pies
+149,Drain Gel,223,Drain,21,Household Cleaners
+150,Dry Spices,379,Herbs & Spices,73,Cooking Needs
+151,Sundry Poultry Free Range,328,Poultry Free Range,120,Poultry
+152,Poultry Free Range Tenderloins,328,Poultry Free Range,120,Poultry
+153,Super Sanitary Pads,296,Sanitary Pads,29,Feminine Hygiene
+154,Combs,164,Cosmetics Accessories,20,Personal Needs
+155,Meals - Italian,52,Meals - Italian,97,Meals
+156,Winter - General,27,Winter,39,Seasonal
+157,Finger Food Hot Deli,298,Hot Food,38,Delicatessen
+158,Hand / Nail Care Moisturiser / Lotions,394,Hand / Nail Care,83,Skincare
+159,Thin Cut,350,Mainstream Potato,43,Snacks
+160,Sundry Other Canned Seafood,495,Other Canned Seafood,108,Canned Seafood
+161,Apple Red Delicious,21,Apple,63,Fresh Fruit
+162,Sundry Continental,150,Continental,38,Delicatessen
+163,Orange Valencia,249,Citrus Fruits,63,Fresh Fruit
+164,Insect Bombs / Liquids,36,Insecticides,85,Household Needs
+165,Frozen Fruit,46,Frozen Fruit,92,Frozen Fruit & Smoothies
+166,Lamb Legs Production Primal,300,Lamb Legs,117,Lamb
+167,Thai Sauces & Paste,101,Thai Food,70,International Food
+168,Beef Topside Production Primal,92,Beef Topside,114,Beef
+169,Liquids & Wicks,448,Air Fresheners / Deodorisers,85,Household Needs
+170,Joint / Muscle Pain,292,Vitamins,52,Vitamins & Supplements
+171,Sanitiser & Disinfect Spray,448,Air Fresheners / Deodorisers,85,Household Needs
+172,Snacks,157,Food,27,Baby
+173,Mayonnaise Food Service,501,Condiments Food Service,101,Dry Grocery Food Service
+174,Smallgoods Ham Steaks,137,Smallgoods Ham,135,Smallgoods
+175,Asian Sauce,316,Table Sauces,16,Condiments
+176,Fetta,330,Speciality Cheese,148,Cheese
+177,Gourmet Sliced Meats,55,Sliced Meat Pre-Packed,105,Smallgoods - Pre-Packed
+178,Winter - Apparel & Headwear,27,Winter,39,Seasonal
+179,Extruded,68,Extruded,43,Snacks
+180,Concentrated Manual,190,Manual,94,Dishwashing
+181,Bon Bons,345,Christmas - General,39,Seasonal
+182,Sculpting,460,Hair Styling,50,Hair Styling
+183,Feed Accessories,438,Bird,140,Pet Accessories
+184,Tea Towels,224,Kitchenware,8,Housewares
+185,Frozen Desserts Sundry,178,Frozen Desserts Sundry,115,Frozen Desserts
+186,Sundry All Purpose,458,All Purpose,21,Household Cleaners
+187,Fragrant Candles & Oil Burners,448,Air Fresheners / Deodorisers,85,Household Needs
+188,Long Life Multipack Juice,426,Long Life Multipack Juice,49,Juice
+189,Xmas Sweet Biscuits,10,Xmas Seasonal,125,Seasonal Lines
+190,Generic Sports & Balls,194,Generic Toys,18,Toys
+191,Meat Substitutes - Schnitzels,91,Vegetarian,7,Frozen Dietary
+192,Packaged Biscuits / Cookies Sweet,153,Packaged Biscuits / Cookies,12,Packaged
+193,Bitesize Large,384,Bitesize / Sharebags,121,Confectionery
+194,Packaged Pastries Tarts,279,Packaged Pastries,12,Packaged
+195,Mouse / Rat Killer,36,Insecticides,85,Household Needs
+196,Fish Cakes,62,Frozen Fish,51,Frozen Seafood
+197,Value Added Mixed Vegetables,302,Mixed Vegetables,82,Frozen Vegetables
+198,Insect Strips / Baits,36,Insecticides,85,Household Needs
+199,Sundry Hair Styling,460,Hair Styling,50,Hair Styling
+200,Specialist Mouthwash,261,Mouthwash,138,Oral Care
+201,Packaged Biscuits / Cookies Shortbread,153,Packaged Biscuits / Cookies,12,Packaged
+202,Tomato Sauce,316,Table Sauces,16,Condiments
+203,Energy Drinks Multipack Can < 500ml,54,Energy Drinks - Multipack,99,Energy Drinks
+204,Winter - Manchester,27,Winter,39,Seasonal
+205,Syrups/Toppings Food Service,325,Desserts - Food Service,101,Dry Grocery Food Service
+206,Women's Stick,217,Stick,42,Deodorants
+207,Sundry Sunscreens,32,Sunscreens,58,Sun Care
+208,Packaged Biscuits / Cookies Anzac,153,Packaged Biscuits / Cookies,12,Packaged
+209,Bird Seed,40,Small Animal Food,89,Small Animal Food
+210,Sundry Sports,134,Sports,4,Medicinal
+211,Medium Bars,241,Bars,121,Confectionery
+212,Asian Meal Kits,225,Asian Food,70,International Food
+213,Crackers,259,Savoury Biscuits,15,Biscuits
+214,Unscented,144,Wipes,27,Baby
+215,Sundry Globes,492,Globes,33,Electrical
+216,Premium Potato,453,Sharepack Premium,43,Snacks
+217,Frozen Snacks/Entertaining Sundry,285,Frozen Snacks/Entertaining Sundry,91,Frozen Snack/Entertaining
+218,Sundry Noodles,154,Noodles,69,Hot & Cold Meals
+219,Sunscreens Spray,32,Sunscreens,58,Sun Care
+220,Dustpan / Sets,18,Brushware,35,Household Cleaning General Merchandise
+221,Seasonal General,58,Seasonal - Other,39,Seasonal
+222,Licensed Girls Toys,349,Licensed Toys,18,Toys
+223,Super Tampons,105,Tampons,29,Feminine Hygiene
+224,Easter Eggs,498,Easter Seasonal,125,Seasonal Lines
+225,Starches / Ironing Aids,128,Laundry,21,Household Cleaners
+226,Hot Desserts Pudding,133,Hot Desserts,115,Frozen Desserts
+227,Cream Sundry,281,Cream Sundry,62,Cream
+228,Pastry Mix,320,Bakery Mix,73,Cooking Needs
+229,Packaged Pastries Croissants,279,Packaged Pastries,12,Packaged
+230,Potato Specialty,500,Frozen Potato,37,Frozen Potato
+231,Regular Sanitary Pads,296,Sanitary Pads,29,Feminine Hygiene
+232,Mousse,460,Hair Styling,50,Hair Styling
+233,Adult Cereals,182,Cereals,93,Breakfast Foods
+234,Multipack - Snacking,425,Fruit - Snacking,44,Fruit
+235,Packaged Donuts Glazed,343,Packaged Donuts,12,Packaged
+236,Sundry Fruit - Syrup,417,Fruit - Syrup,44,Fruit
+237,Disposables,345,Christmas - General,39,Seasonal
+238,Scented,144,Wipes,27,Baby
+239,Whole Egg Mayonnaise,15,Dressings & Mayonnaises,16,Condiments
+240,Low Fat & Diet Regular Yoghurt,66,Regular Yoghurt,134,Yoghurts
+241,Seasonal Lines Sundry,93,Seasonal Lines Sundry,125,Seasonal Lines
+242,Cooking Cream,207,Cream,62,Cream
+243,Drain Liquid,223,Drain,21,Household Cleaners
+244,Men's Shaving Preparations,156,Men's Blades & Razors,137,Mens Grooming
+245,Non-Alcoholic Cocktail Bases,276,Non-Alcoholic Beverages All,24,Non Alcoholic Beverages
+246,Baby Sundry,198,Baby Sundry,27,Baby
+247,Sundry Game Kangaroo,108,Game Kangaroo,84,Game
+248,,187,Milk & Water Modifiers,122,Beverages
+249,Parmesan,330,Speciality Cheese,148,Cheese
+250,Liquid Diet Cordials,231,Cordials,95,Cordials
+251,Corn Meat Canned,61,Canned Meats & Meal,69,Hot & Cold Meals
+252,Kids Toothbrushes,457,Toothbrushes,138,Oral Care
+253,Sundry Sharepack Premium,453,Sharepack Premium,43,Snacks
+254,Packaged Donuts Plain,343,Packaged Donuts,12,Packaged
+255,Olive Oil,107,Oils,73,Cooking Needs
+256,Peas Canned,212,Vegetables,40,Vegetables & Salads
+257,Kids Snacking Cheese,216,Snacking Cheese,148,Cheese
+258,Medicated Deodorants,210,Deodorants,42,Deodorants
+259,Crispbread,259,Savoury Biscuits,15,Biscuits
+260,Ovenware Glassware,256,Glassware,8,Housewares
+261,Hair Colour Sundry,243,Hair Colour Sundry,131,Hair Colour
+262,Kids Desserts,473,Chilled Desserts,132,Desserts
+263,Fabric Refresheners,128,Laundry,21,Household Cleaners
+264,Potting Mixes,321,Gardening,48,Gardening Products
+265,Sundry Packaged Muffins,371,Packaged Muffins,12,Packaged
+266,Sundry Cheese - Deli,452,Cheese - Deli,38,Delicatessen
+267,Packaged Desserts Pavlovas,254,Packaged Desserts,12,Packaged
+268,Sundry Pet Accessories General Merchandise,493,Pet Accessories - General Merchandise,144,Pet Needs - General Merchandise
+269,Single Bar Soap,318,Bar Soap,71,Soap & Bath
+270,Nasal Spray,398,Sinus & Allergy,4,Medicinal
+271,Salad Bagged,115,Salad,47,Value Add Produce
+272,Mixed Blends Deli,160,Olives / Brines Deli,38,Delicatessen
+273,Mexican Tacos,20,Mexican Food,70,International Food
+274,Soft Drink Pet Bottle >= 600ml,299,Soft Drinks,55,Soft Drinks
+275,Vegetable Oil,107,Oils,73,Cooking Needs
+276,Microwave,474,Popcorn,43,Snacks
+277,Ready to Serve Wet Gravy,114,Gravy & Finishing Sauce,16,Condiments
+278,Car Cleaners,304,Car Care,25,Automotive
+279,Garlic,440,Chilled Bread,109,Chilled Bread
+280,Salmon,435,Fish - Pre-Packed,75,Seafood - Pre-Packed
+281,Baking Powder,431,Baking Needs,73,Cooking Needs
+282,Pie Fillings,191,Desserts,34,Desserts & Toppings
+283,Dish Brushes,18,Brushware,35,Household Cleaning General Merchandise
+284,Marinated Olives Deli,160,Olives / Brines Deli,38,Delicatessen
+285,Proprietary Breads Fruit,387,Proprietary Breads,36,Proprietary
+286,Gifts,345,Christmas - General,39,Seasonal
+287,Premium Facial Tissues,463,Facial Tissues,147,Facial Tissues
+288,Sundry Value Add Meal,50,Value Add Meat Meal,59,Value Add Meat
+289,Magazines,109,"Magazines, Papers & Books",78,Publications
+290,Mustards Condiments,74,Pickled Vegetables,16,Condiments
+291,Packaged Muffins English,371,Packaged Muffins,12,Packaged
+292,Packaged Bar Cakes,226,Packaged Cakes,12,Packaged
+293,Beef Cube Roll Retail Ready,78,Beef Cube Roll,114,Beef
+294,Beef Sundry,136,Beef Sundry,114,Beef
+295,Medicated Multi,110,Medicated,121,Confectionery
+296,Chicken Portion,71,Natural Chicken,31,Frozen Poultry
+297,Pineapple - Juice,314,Fruit - Juice,44,Fruit
+298,Beef Economy Steaks Rump,205,Beef Economy Steaks,114,Beef
+299,Brushes & Combs,138,Dog / Cat,140,Pet Accessories
+300,Budget Conditioner,408,Conditioner,66,Hair Care
+301,Carpet Liquid,65,Carpet,21,Household Cleaners
+302,Fish,75,Fish,140,Pet Accessories
+303,Mothers Day,313,Seasonal Events,39,Seasonal
+304,Glues / Adhesives,184,Hardware,128,Hardware
+305,Sundry Oils,107,Oils,73,Cooking Needs
+306,Pasta / Lasagne / Other,312,Family Frozen Meals,96,Frozen Meals
+307,Sundry Insecticides,36,Insecticides,85,Household Needs
+308,Antacids,491,Stomach & Bowel,4,Medicinal
+309,Winter - Housewares,27,Winter,39,Seasonal
+310,Marmalades,307,Sweet Spreads,143,Spreads
+311,Healthy - Bowls,4,Healthy,96,Frozen Meals
+312,Seafood Frozen Oyster / Mollusk / Scallop,142,Seafood Frozen,5,Seafood
+313,Sparkling Flavoured Multipack < = 600ml,449,Sparkling Water,57,Water
+314,Denture Care Tablets,414,Denture Care,138,Oral Care
+315,Chilled Dual Purpose Meats,471,Chilled Dual Purpose,104,Pet Food
+316,Sundry Disposable Tableware,341,Disposable Tableware,129,Disposable
+317,Peas,83,Frozen Vegetables,82,Frozen Vegetables
+318,Sundry Flavoured Milk,186,Flavoured Milk,1,Milk
+319,Women's Pump,239,Pump,42,Deodorants
+320,Patty Pans,431,Baking Needs,73,Cooking Needs
+321,Sandwich Bags,252,Bags,139,Paper Goods
+322,Corn Canned,212,Vegetables,40,Vegetables & Salads
+323,Poultry Fresh Drumsticks,158,Poultry Standard Fresh,120,Poultry
+324,Sundry Baking Needs,431,Baking Needs,73,Cooking Needs
+325,Fire Alarms,263,Electrical Accessories,33,Electrical
+326,Honey,307,Sweet Spreads,143,Spreads
+327,Quiche - Family,248,Quiche - Family,124,Quiches & Pies
+328,Dried Vegetables,212,Vegetables,40,Vegetables & Salads
+329,Beans,83,Frozen Vegetables,82,Frozen Vegetables
+330,Flavoured Snacks,259,Savoury Biscuits,15,Biscuits
+331,Collars,138,Dog / Cat,140,Pet Accessories
+332,Below the Knee Hosiery,166,Hosiery,79,Apparel
+333,Hair Accessories,164,Cosmetics Accessories,20,Personal Needs
+334,"Broom Heads, Miscellaneous",18,Brushware,35,Household Cleaning General Merchandise
+335,Sports Bars,2,Health Food Weight Management,17,Health Food
+336,Wraps Plastic,364,Wraps & Foils,139,Paper Goods
+337,Tomato Snacking,400,Tomato,81,Vegetable
+338,251-500g Regular Bacon,382,Bacon Pre-Packed,105,Smallgoods - Pre-Packed
+339,Facial Skincare Bb Cream,456,Facial Skincare,83,Skincare
+340,Proprietary Breads Rolls,387,Proprietary Breads,36,Proprietary
+341,Girls Toys,366,Christmas - Toys,39,Seasonal
+342,Women's Disposable Razors,269,Women's Blades & Razors,87,Women's Hair Removal
+343,Meals Sundry,155,Meals Sundry,97,Meals
+344,Fibre Supplements,491,Stomach & Bowel,4,Medicinal
+345,Premium Health Dry Dog Food,103,Dry Dog Food,86,Dog Food
+346,Yoghurt Based Desserts,473,Chilled Desserts,132,Desserts
+347,Packaged Pastries Pies,279,Packaged Pastries,12,Packaged
+348,Men's Body Spray,97,Men's Deodorants,137,Mens Grooming
+349,Speciality Milk,53,Speciality Milk,1,Milk
+350,Pork Collar Butts Retail Ready,428,Pork Collar Butts,74,Pork
+351,Sundry Seafood Food Service,112,Seafood Frozen Food Service,116,Frozen Food Service
+352,Clothes Line,326,Pegs / Lines & Accessories,35,Household Cleaning General Merchandise
+353,Meals - Classic,377,Meals - Classic,97,Meals
+354,Shoe Brushes,18,Brushware,35,Household Cleaning General Merchandise
+355,Sundry Packaged Donuts,343,Packaged Donuts,12,Packaged
+356,Flavoured,330,Speciality Cheese,148,Cheese
+357,Family Full Cream Plain Milk (>= 1l),334,Full Cream Plain Milk,1,Milk
+358,Fresh Cheese Deli,452,Cheese - Deli,38,Delicatessen
+359,Sports & Balls,366,Christmas - Toys,39,Seasonal
+360,Boys Underwear,177,Boyswear,79,Apparel
+361,Packaged Health & Wellbeing Loaves,396,Packaged Health & Wellbeing,12,Packaged
+362,Sundry Barbecue / Coolers / Picnic,161,Barbecue / Coolers / Picnic,102,Outdoor / Leisure
+363,Traditional Puddings,191,Desserts,34,Desserts & Toppings
+364,Herbs & Spices Food Service,135,Cake & Cooking Needs Food Service,101,Dry Grocery Food Service
+365,Sparkling Plain Multipack < = 600ml,449,Sparkling Water,57,Water
+366,Quiche - Single,37,Quiche - Single,124,Quiches & Pies
+367,Party Sundry,247,Party Sundry,61,Party
+368,Packaged Seasonal Other Seasons,436,Packaged Seasonal,12,Packaged
+369,Lifestyle Beverages Sundry,381,Lifestyle Beverages Sundry,149,Lifestyle Beverages
+370,Cocoa / Drinking Chocolate,187,Milk & Water Modifiers,122,Beverages
+371,Icing Sugar,369,Sugar,73,Cooking Needs
+372,Sundry Desserts,191,Desserts,34,Desserts & Toppings
+373,Men's Grooming Sundry,315,Men's Grooming Sundry,137,Mens Grooming
+374,Sundry Asian Food,225,Asian Food,70,International Food
+375,Travel Accessories,451,Travel,111,Travel
+376,Packaged Breads Buns,339,Packaged Breads,12,Packaged
+377,Ancient Grains,188,Grains,10,Grains & Pasta
+378,Multi Paper Towel,490,Paper Towels,139,Paper Goods
+379,4 Serves Packet,245,Packet,68,Soups
+380,Fermented Salamis,358,Salamis,38,Delicatessen
+381,Sundry Drinks,434,Drinks,54,Chilled Juices & Drinks
+382,Smallgoods Ham Boneless Portion,137,Smallgoods Ham,135,Smallgoods
+383,Cotton,56,Cotton,4,Medicinal
+384,Kitchen Utensils / Gadgets,224,Kitchenware,8,Housewares
+385,Mainstream Gifting,338,Gifting,121,Confectionery
+386,Potato Washed Pre Pack,286,Potato,127,Hard Produce
+387,Mixers Can Multipack,365,Mixers,55,Soft Drinks
+388,Large Juices (>=1l),98,Juices,54,Chilled Juices & Drinks
+389,Matches,80,Matches,56,Matches & Lighter
+390,Licensed Indoor Activities & Board Games,349,Licensed Toys,18,Toys
+391,Sundry Table Sauces,316,Table Sauces,16,Condiments
+392,Health Ingredients,378,Health Ingredients,17,Health Food
+393,Women's Hair Removal Sundry,165,Women's Hair Removal Sundry,87,Women's Hair Removal
+394,Easter,313,Seasonal Events,39,Seasonal
+395,Regular Full Cream,207,Cream,62,Cream
+396,Seasonal - Wet Weather,58,Seasonal - Other,39,Seasonal
+397,Sundry Wipes,144,Wipes,27,Baby
+398,Picnicware / Cooling,397,Food Storage,8,Housewares
+399,Non-Alcoholic Still Wine,276,Non-Alcoholic Beverages All,24,Non Alcoholic Beverages
+400,Pink Salmon Large Can (>95g),412,Salmon,108,Canned Seafood
+401,Sundry Toiletries,3,Toiletries,27,Baby
+402,Mainstream Juice <=1l,497,Mainstream Juice,49,Juice
+403,Packaged Desserts Cheesecakes,254,Packaged Desserts,12,Packaged
+404,Sundry Bacon,233,Bacon,38,Delicatessen
+405,Rice White,188,Grains,10,Grains & Pasta
+406,Beef Diced,129,Beef Stir Fry / Dice / Schnitzel,114,Beef
+407,White Vinegars,100,Vinegars,16,Condiments
+408,Umbrellas & Wet Weather,282,Apparel Accessories,79,Apparel
+409,Coolers / Jugs,161,Barbecue / Coolers / Picnic,102,Outdoor / Leisure
+410,Liquid Sugared Cordials,231,Cordials,95,Cordials
+411,Concentrates Home Brew,95,Home Brew,80,Home Brew
+412,Pepper,379,Herbs & Spices,73,Cooking Needs
+413,Sundry Frozen Potato,500,Frozen Potato,37,Frozen Potato
+414,,291,Seafood Bulk Frozen,5,Seafood
+415,Game Kangaroo Steaks,108,Game Kangaroo,84,Game
+416,Pre Packed Continental,150,Continental,38,Delicatessen
+417,Flasks / Jugs / Drink Bottles,397,Food Storage,8,Housewares
+418,Bowls Crockery,411,Crockery,8,Housewares
+419,Kitchen Liquid / Gel,294,Kitchen,21,Household Cleaners
+420,Women's Aerosol,472,Aerosol,42,Deodorants
+421,Value Add Sausages Beef,5,Value Add Meat Sausages,59,Value Add Meat
+422,Mint Sauce,316,Table Sauces,16,Condiments
+423,Coleslaw Salad Dressing,15,Dressings & Mayonnaises,16,Condiments
+424,Winter - Heating Appliances,27,Winter,39,Seasonal
+425,Value Add Sausages Pork,5,Value Add Meat Sausages,59,Value Add Meat
+426,Cup Noodles,154,Noodles,69,Hot & Cold Meals
+427,Ground Coffee,489,Roast & Ground Coffee,28,Coffee
+428,Dog Accessories - General Merchandise,493,Pet Accessories - General Merchandise,144,Pet Needs - General Merchandise
+429,Powdered Gravy,114,Gravy & Finishing Sauce,16,Condiments
+430,Pork Legs Production Primal,479,Pork Legs,74,Pork
+431,Plant Based Shredded Cheese,470,Plant Based Cheese,103,Chilled Health
+432,Automotive Sundry,89,Automotive Sundry,25,Automotive
+433,Car Polish,304,Car Care,25,Automotive
+434,Red Salmon Large Can >95g),412,Salmon,108,Canned Seafood
+435,Bulk Nappies,383,Nappies,27,Baby
+436,Sundry Partyware,122,Partyware,61,Party
+437,Snacks with Dipping,392,Other Nutritional Snacks,90,Nutritional Snacks
+438,Proprietary Snacks Crumpets,406,Proprietary Snacks,36,Proprietary
+439,251-500g Shredded Cheese,104,Shredded Cheese,148,Cheese
+440,Microwavable Ready To Eat,376,Ready To Eat,68,Soups
+441,Packaged Breads Fruit,339,Packaged Breads,12,Packaged
+442,Cough Liquid,130,Cough & Cold,4,Medicinal
+443,Danish / Crumble Family,386,Danish / Crumble,115,Frozen Desserts
+444,Nursing Pads,433,Mother Needs,27,Baby
+445,Summer - Housewares,264,Summer,39,Seasonal
+446,Chilled Dog Food Mince,213,Chilled Dog Food,104,Pet Food
+447,Arrowroot,431,Baking Needs,73,Cooking Needs
+448,Men's Underwear,145,Underwear,30,Incontinence
+449,Cold Desserts Cake,183,Cold Desserts,115,Frozen Desserts
+450,Seasonal - Pet,58,Seasonal - Other,39,Seasonal
+451,Family Cereals,182,Cereals,93,Breakfast Foods
+452,Sundry Bathroom,362,Bathroom,21,Household Cleaners
+453,Packaged Sponge Cakes,226,Packaged Cakes,12,Packaged
+454,Trays Foil,364,Wraps & Foils,139,Paper Goods
+455,Natural Poultry - Turkey,354,Natural Poultry,31,Frozen Poultry
+456,Multipack Mainstream,494,Multipack,6,Ice Cream
+457,Mop Refill,18,Brushware,35,Household Cleaning General Merchandise
+458,Traditional - Plated,309,Traditional,96,Frozen Meals
+459,Seafood Sundry,427,Seafood Sundry,5,Seafood
+460,Speciality Black,38,Teas,122,Beverages
+461,Cooking Salt,379,Herbs & Spices,73,Cooking Needs
+462,Coffee Value,13,Soluble Coffee,28,Coffee
+463,Impulse Strips,482,Impulse Strips,118,Impulse Strips
+464,Eye Drops / Wash,124,Eye Care,4,Medicinal
+465,Beef Shortloin Retail Ready,67,Beef Shortloin,114,Beef
+466,Sundry Furniture,149,Furniture,21,Household Cleaners
+467,Sliced Cheese Processed Food Service,308,Cheeses Processed Food Service,76,Refrigerated & Dairy Food Service
+468,Wholemeal Flour,208,Flour & Bread Mix,73,Cooking Needs
+469,Sundry Side Dishes,51,Side Dishes,69,Hot & Cold Meals
+470,Key Value Lines,418,Key Value Lines,13,Key Value Lines
+471,Rice Brown,188,Grains,10,Grains & Pasta
+472,Crystals,441,Cat Litter,45,Cat Litter
+473,Feeding Accessories,76,Baby Accessories,27,Baby
+474,Beef Sliced Deli,45,Sliced / Shaved Meats,38,Delicatessen
+475,Mugs Crockery,411,Crockery,8,Housewares
+476,Men's Styling,346,Men's Hair Care,137,Mens Grooming
+477,Ribbons Bows & Tags,345,Christmas - General,39,Seasonal
+478,Processed Sliced Cheese,352,Sliced,148,Cheese
+479,Sundry Savoury Spreads,399,Savoury Spreads,143,Spreads
+480,BBQ / Steak Sauce,316,Table Sauces,16,Condiments
+481,Sundry Vitamins,292,Vitamins,52,Vitamins & Supplements
+482,Powdered Stock,244,Stock,73,Cooking Needs
+483,Poppers Partyware,122,Partyware,61,Party
+484,Milk Condensed / Evaporated,228,Milk & Cream - Long Life,122,Beverages
+485,2 Serves Packet,245,Packet,68,Soups
+486,Clay,441,Cat Litter,45,Cat Litter
+487,Check-Out Bags,69,Bags - Store Use,146,Store Use Supplies
+488,Mainstream Juice >2.5l,497,Mainstream Juice,49,Juice
+489,Bones / Hocks Bacon Deli,233,Bacon,38,Delicatessen
+490,Sundry Health Food Snacks,293,Health Food Snacks,17,Health Food
+491,Pre-Wash Soaker / Sprays,128,Laundry,21,Household Cleaners
+492,Australia Day,313,Seasonal Events,39,Seasonal
+493,Marinades / Sauces Cooking,163,Meal Bases,16,Condiments
+494,Snack / Rewards,119,Dog Treats,86,Dog Food
+495,Brushes Shoe Care,275,Shoe Care,85,Household Needs
+496,Mens Socks,430,Menswear,79,Apparel
+497,Mexican Wraps,20,Mexican Food,70,International Food
+498,Plant Based Sliced Cheese,470,Plant Based Cheese,103,Chilled Health
+499,Home Entertainment,139,Audio / Video,33,Electrical
+500,Regular Tampons,105,Tampons,29,Feminine Hygiene
+501,Continental Frankfurts / Smoked,152,Frankfurts / Smoked,38,Delicatessen
+502,Still Flavoured Singles < = 600ml,496,Still Water,57,Water
+503,Swiss Cheese Deli,452,Cheese - Deli,38,Delicatessen
+504,Sundry Eye Care,124,Eye Care,4,Medicinal
+505,Packaged Donuts Filled,343,Packaged Donuts,12,Packaged
+506,Plant Based Kraut,238,Plant Based Add Ons,103,Chilled Health
+507,Sparkling Plain > 600ml,449,Sparkling Water,57,Water
+508,Wool Wash,128,Laundry,21,Household Cleaners
+509,Ladies Underwear,193,Ladieswear,79,Apparel
+510,Pet,345,Christmas - General,39,Seasonal
+511,Medicated Shampoo,485,Shampoo,66,Hair Care
+512,Steel Wool,84,Cleaning Materials,142,Cleaning Materials
+513,Personal Needs Sundry,278,Personal Needs Sundry,20,Personal Needs
+514,Eggs Food Service,181,Eggs Food Service,76,Refrigerated & Dairy Food Service
+515,New Year,345,Christmas - General,39,Seasonal
+516,Dry Soup Mixes,245,Packet,68,Soups
+517,Pest Control Insecticide,36,Insecticides,85,Household Needs
+518,Sparkling Flavoured Singles < = 600ml,449,Sparkling Water,57,Water
+519,Manual Premium Toothbrushes,457,Toothbrushes,138,Oral Care
+520,Door Mats,59,Mats,35,Household Cleaning General Merchandise
+521,Soothers,76,Baby Accessories,27,Baby
+522,Platters Cheese Deli,452,Cheese - Deli,38,Delicatessen
+523,Game Venison Retail Ready,116,Game Venison,84,Game
+524,Topped Biscuits,175,Sweet Biscuits,15,Biscuits
+525,Milk Wet Cat Food,267,Wet Cat Food,11,Cat Food
+526,Ropes Hardware,184,Hardware,128,Hardware
+527,Seasonings & Stuffing,353,Other Cooking Needs,73,Cooking Needs
+528,Packaged Seasonal Easter Varieties,436,Packaged Seasonal,12,Packaged
+529,Pork Aussie Ribs Production,64,Pork Aussie Ribs,74,Pork
+530,Sundry Packaged Health & Wellbeing,396,Packaged Health & Wellbeing,12,Packaged
+531,Mints Multi,33,Mints,121,Confectionery
+532,Asian Noodles,225,Asian Food,70,International Food
+533,Asparagus Canned,212,Vegetables,40,Vegetables & Salads
+534,Wraps Foil,364,Wraps & Foils,139,Paper Goods
+535,Fish Natural,62,Frozen Fish,51,Frozen Seafood
+536,Disposable Sundry,277,Disposable Sundry,129,Disposable
+537,Specialty Coffee,87,Specialty Coffee,28,Coffee
+538,Filled Pasta,385,Pasta - Fresh,2,Pasta - Fresh
+539,Adhesive Strips,447,First Aid,4,Medicinal
+540,Sundry Flour & Bread Mix,208,Flour & Bread Mix,73,Cooking Needs
+541,Implements,57,Interdental,138,Oral Care
+542,Flushable Wipes,415,Toilet Tissue,145,Toilet Tissue
+543,Window Liquid,24,Window,21,Household Cleaners
+544,Funsize Medium,260,Funsize / Sharepacks,121,Confectionery
+545,Regular Manual,190,Manual,94,Dishwashing
+546,Hairspray,469,Hairspray,50,Hair Styling
+547,Cooking Needs,12,Camping,102,Outdoor / Leisure
+548,Beans Frozen Food Service,480,Vegetables Frozen Food Service,116,Frozen Food Service
+549,<=250g Shortcut Bacon,382,Bacon Pre-Packed,105,Smallgoods - Pre-Packed
+550,In-Cistern,227,Toilet,21,Household Cleaners
+551,Value Add Meal Lasagne,50,Value Add Meat Meal,59,Value Add Meat
+552,Personal Repellents,36,Insecticides,85,Household Needs
+553,Lifestyle Beverages Singles 500ml - 999m,258,Lifestyle Beverages - Singles,149,Lifestyle Beverages
+554,Pouches,157,Food,27,Baby
+555,Sundry Tuna,117,Tuna,108,Canned Seafood
+556,Sundry Cough & Cold,130,Cough & Cold,4,Medicinal
+557,Poultry Fresh Whole Chicken,158,Poultry Standard Fresh,120,Poultry
+558,All Purpose Liquid / Gel,458,All Purpose,21,Household Cleaners
+559,Tuna Ready To Eat Meal Kits,117,Tuna,108,Canned Seafood
+560,Pregnancy Tests,192,Sexual Health,4,Medicinal
+561,Pate,150,Continental,38,Delicatessen
+562,Chilli Sauce,316,Table Sauces,16,Condiments
+563,Still Plain Singles < = 600ml,496,Still Water,57,Water
+564,Feminine Hygiene Sundry,47,Feminine Hygiene Sundry,29,Feminine Hygiene
+565,Mascara,203,Eyes,41,Cosmetics
+566,Lifestyle Beverages Singles >= 1l,258,Lifestyle Beverages - Singles,149,Lifestyle Beverages
+567,Bowls,224,Kitchenware,8,Housewares
+568,Liquid Disinfectant,462,Disinfectants,21,Household Cleaners
+569,"Sundry Magazines, Papers & Books",109,"Magazines, Papers & Books",78,Publications
+570,Health Bars,2,Health Food Weight Management,17,Health Food
+571,Snacks Sundry,189,Snacks Sundry,43,Snacks
+572,Dips - Regular,9,Dips,19,Dips
+573,Salami - Sliced,94,Salami Pre-Packed,105,Smallgoods - Pre-Packed
+574,Diced,486,Tomatoes,40,Vegetables & Salads
+575,Mushrooms Canned,212,Vegetables,40,Vegetables & Salads
+576,Apple Granny Smith,21,Apple,63,Fresh Fruit
+577,Soft Drink Can Singles,299,Soft Drinks,55,Soft Drinks
+578,Seafood Frozen Smoked,142,Seafood Frozen,5,Seafood
+579,Bed Linen,253,Manchester,106,Manchester
+580,Premium Gifting,338,Gifting,121,Confectionery
+581,Smoked Frankfurts,152,Frankfurts / Smoked,38,Delicatessen
+582,Tomato Pastes,196,Pasta Sauce,16,Condiments
+583,Cheese,399,Savoury Spreads,143,Spreads
+584,Mens Underwear,430,Menswear,79,Apparel
+585,Rice Aromatic,188,Grains,10,Grains & Pasta
+586,Sundry Packaged Seasonal,436,Packaged Seasonal,12,Packaged
+587,Summer - Beach,264,Summer,39,Seasonal
+588,Sundry Processed Poultry,402,Processed Poultry,31,Frozen Poultry
+589,Computer Accessories Stationery,439,Office Stationery,3,Stationery
+590,Toys,138,Dog / Cat,140,Pet Accessories
+591,Copy / Fax / Computer Paper,439,Office Stationery,3,Stationery
+592,Lights,345,Christmas - General,39,Seasonal
+593,Beef Knuckle Retail Ready,81,Beef Knuckle,114,Beef
+594,Xmas Cooking Needs,10,Xmas Seasonal,125,Seasonal Lines
+595,Sardine,495,Other Canned Seafood,108,Canned Seafood
+596,500-750g Natural Sliced Cheese,352,Sliced,148,Cheese
+597,Generic Indoor Activities & Board Games,194,Generic Toys,18,Toys
+598,Semi-Permanet,478,Hair Colour,131,Hair Colour
+599,Chocolate Covered Biscuits,175,Sweet Biscuits,15,Biscuits
+600,Bottles / Teats,76,Baby Accessories,27,Baby
+601,Cabanossi Kabana,30,Other Smallgoods - Pre-Packed,105,Smallgoods - Pre-Packed
+602,Sun Protection,340,Lipcare,58,Sun Care
+603,Kingsize Bars,241,Bars,121,Confectionery
+604,Halogen Lights,492,Globes,33,Electrical
+605,Mainstream Dry Cat Food,118,Dry Cat Food,11,Cat Food
+606,Gift Cards,219,Cards & Wrapping,3,Stationery
+607,Budget Toilet Tissue,415,Toilet Tissue,145,Toilet Tissue
+608,Large Self Consumption,17,Self Consumption,43,Snacks
+609,Facial Skincare Cleansers,456,Facial Skincare,83,Skincare
+610,Men's Shampoo & Conditioner,346,Men's Hair Care,137,Mens Grooming
+611,Pretzels,120,Nuts & Jerky,133,Nuts & Jerky
+612,Premium Taste Dry Cat Food,118,Dry Cat Food,11,Cat Food
+613,Organic Yoghurt,99,Other Yoghurt,134,Yoghurts
+614,Blue Cheese Deli,452,Cheese - Deli,38,Delicatessen
+615,Paints & Paint Brushes,184,Hardware,128,Hardware
+616,Sundry Mixers,365,Mixers,55,Soft Drinks
+617,Toys Packs - Pre Packs,366,Christmas - Toys,39,Seasonal
+618,Coffe Substitutes,13,Soluble Coffee,28,Coffee
+619,Cottage Cheese,404,Other Cheese,148,Cheese
+620,Chilled Bread Sundry,361,Chilled Bread Sundry,109,Chilled Bread
+621,Boxed Glassware,256,Glassware,8,Housewares
+622,Pies Snack,446,Pies,98,Frozen Pies & Pastries
+623,Cordials Sundry,35,Cordials Sundry,95,Cordials
+624,Car Care Accessories,304,Car Care,25,Automotive
+625,Sausages,30,Other Smallgoods - Pre-Packed,105,Smallgoods - Pre-Packed
+626,Tea Towels,253,Manchester,106,Manchester
+627,Sundry Glassware,256,Glassware,8,Housewares
+628,Take Home Tubs Value,255,Take Home Tubs,6,Ice Cream
+629,Chai,38,Teas,122,Beverages
+630,Acne,70,Medicated / Therapeutic,83,Skincare
+631,>501g Regular Bacon,382,Bacon Pre-Packed,105,Smallgoods - Pre-Packed
+632,Lighters,88,Lighters,56,Matches & Lighter
+633,Soft Drinks Sundry,289,Soft Drinks Sundry,55,Soft Drinks
+634,Proprietary Health & Wellbeing Snacks,79,Proprietary Health & Wellbeing,36,Proprietary
+635,Spaghetti,229,Canned Baked Beans & Spaghetti,69,Hot & Cold Meals
+636,Toppings,90,Toppings,34,Desserts & Toppings
+637,Poultry Free Range Mince,328,Poultry Free Range,120,Poultry
+638,LED Globes,492,Globes,33,Electrical
+639,Prawns Frozen Food Service,112,Seafood Frozen Food Service,116,Frozen Food Service
+640,Poultry Free Range Breast Fillet,328,Poultry Free Range,120,Poultry
+641,Puff,180,Frozen Bread & Pastry,112,Frozen Bread & Pastry
+642,Face Washers,253,Manchester,106,Manchester
+643,Poultry Free Range Whole Chicken,328,Poultry Free Range,120,Poultry
+644,Proprietary Health & Wellbeing Loaves,79,Proprietary Health & Wellbeing,36,Proprietary
+645,Seafood Bulk Cooked Prawns Whole,291,Seafood Bulk Frozen,5,Seafood
+646,,309,Traditional,96,Frozen Meals
+647,All Purpose Wipes,458,All Purpose,21,Household Cleaners
+648,Economy Dry Dog Food,103,Dry Dog Food,86,Dog Food
+649,Processed Cheese Deli,452,Cheese - Deli,38,Delicatessen
+650,Fluorescent Lights,492,Globes,33,Electrical
+651,Garden Bags,252,Bags,139,Paper Goods
+652,Kids Cereals,182,Cereals,93,Breakfast Foods
+653,Tenders,422,Processed Chicken,31,Frozen Poultry
+654,Cornflour,208,Flour & Bread Mix,73,Cooking Needs
+655,Worcestershire Sauce,316,Table Sauces,16,Condiments
+656,Gel & Blocks,448,Air Fresheners / Deodorisers,85,Household Needs
+657,Long Life Cream,228,Milk & Cream - Long Life,122,Beverages
+658,Soft Drink Pet Bottle Multipack <= 600ml,299,Soft Drinks,55,Soft Drinks
+659,Electric,448,Air Fresheners / Deodorisers,85,Household Needs
+660,Sundry Easter Seasonal,498,Easter Seasonal,125,Seasonal Lines
+661,Regular Margarine,368,Margarine,100,Chilled Spreads
+662,Surface Sprays Insecticides,36,Insecticides,85,Household Needs
+663,Sport Powder,2,Health Food Weight Management,17,Health Food
+664,Permanent,478,Hair Colour,131,Hair Colour
+665,Premium Taste Wet Cat Food,267,Wet Cat Food,11,Cat Food
+666,Oil Sprays,107,Oils,73,Cooking Needs
+667,Furniture Polish,132,Polishes,21,Household Cleaners
+668,Peg Baskets,326,Pegs / Lines & Accessories,35,Household Cleaning General Merchandise
+669,Cream Biscuits,175,Sweet Biscuits,15,Biscuits
+670,Note / Exercise / Docket Books,221,School / Home Stationery,3,Stationery
+671,Sundry Dried Fruit & Nuts,335,Dried Fruit & Nuts,73,Cooking Needs
+672,Salami - Snacking,94,Salami Pre-Packed,105,Smallgoods - Pre-Packed
+673,Sundry Pork Value Added,131,Pork Value Added,74,Pork
+674,Poultry Free Range Steak & Schnitzel,328,Poultry Free Range,120,Poultry
+675,Store Use Supplies Sundry,499,Store Use Supplies Sundry,146,Store Use Supplies
+676,Sundry Packaged Desserts,254,Packaged Desserts,12,Packaged
+677,Funsize Large,260,Funsize / Sharepacks,121,Confectionery
+678,Brown Sugar,369,Sugar,73,Cooking Needs
+679,In-Bowl,227,Toilet,21,Household Cleaners
+680,Kids Cereal / Nut Bars,419,Cereal / Nut Bars,90,Nutritional Snacks
+681,Handicraft,201,Haberdashery,53,Haberdashery
+682,Italian Salad Dressing,15,Dressings & Mayonnaises,16,Condiments
+683,Health Food Sundry,236,Health Food Sundry,17,Health Food
+684,Sundry Pies/Rolls/Pasties Frozen Food Service,14,Pies/Rolls/Pasties Food Service,116,Frozen Food Service
+685,Xmas Counter Lines,10,Xmas Seasonal,125,Seasonal Lines
+686,Value Add Sausages BBQ,5,Value Add Meat Sausages,59,Value Add Meat
+687,Milk Powdered,301,Milk Powdered - Long Life,122,Beverages
+688,Sundry Appliances,151,Appliances,33,Electrical
+689,Plain Greek Yoghurt,388,Greek Yoghurt,134,Yoghurts
+690,Switches / Plugs / Adapters,263,Electrical Accessories,33,Electrical
+691,Cutlery,224,Kitchenware,8,Housewares
+692,Jars,157,Food,27,Baby
+693,Family Flavoured Milk (>= 1l),186,Flavoured Milk,1,Milk
+694,Sundry Dinners Food Service,1,Dinners Food Service,116,Frozen Food Service
+695,Sports Drinks Bottle > 600ml,72,Sports Drinks - Bottle,67,Sports Drinks
+696,Aftersun,202,Aftersun,58,Sun Care
+697,Pillows,253,Manchester,106,Manchester
+698,Sundry Camping,12,Camping,102,Outdoor / Leisure
+699,Salad Dressings Food Service,501,Condiments Food Service,101,Dry Grocery Food Service
+700,Chutney / Relish Condiments,74,Pickled Vegetables,16,Condiments
+701,Sundry Sweet Spreads,307,Sweet Spreads,143,Spreads
+702,Lamb Forequarters Necks,102,Lamb Forequarters,117,Lamb
+703,Standard Mouthwash,261,Mouthwash,138,Oral Care
+704,Milk Portions Food Service,355,Fresh Milk Food Service,76,Refrigerated & Dairy Food Service
+705,Bakeware,224,Kitchenware,8,Housewares
+706,Finger Foods Frozen Food Service,290,Finger Foods Food Service,116,Frozen Food Service
+707,<=250g Natural Sliced Cheese,352,Sliced,148,Cheese
+708,Dusters,18,Brushware,35,Household Cleaning General Merchandise
+709,Sundry Bags,69,Bags - Store Use,146,Store Use Supplies
+710,Shampoo & Conditioner,138,Dog / Cat,140,Pet Accessories
+711,Sauces,168,Sauces - Fresh,2,Pasta - Fresh
+712,Creams Food Service,235,Creams Food Service,76,Refrigerated & Dairy Food Service
+713,Beef Striploin Retail Ready,303,Beef Striploin,114,Beef
+714,Thai Noodles,101,Thai Food,70,International Food
+715,Footcare,111,Footcare,4,Medicinal
+716,Sparkling Flavoured > 600ml,449,Sparkling Water,57,Water
+717,Free Range Eggs,123,Eggs,130,Eggs
+718,Pantyhose,166,Hosiery,79,Apparel
+719,Blocks Butter,374,Butter,100,Chilled Spreads
+720,Broom Handles,18,Brushware,35,Household Cleaning General Merchandise
+721,Soft Drink Can Multipack <10pk,299,Soft Drinks,55,Soft Drinks
+722,Packaged Health & Wellbeing Wraps,396,Packaged Health & Wellbeing,12,Packaged
+723,Value Add Burgers Chicken,297,Value Add Meat Burgers,59,Value Add Meat
+724,Herbicides,321,Gardening,48,Gardening Products
+725,Sundry First Aid,447,First Aid,4,Medicinal
+726,Generic Bubbles & Novelty Toys,194,Generic Toys,18,Toys
+727,White Sugar,369,Sugar,73,Cooking Needs
+728,Audio / Video Accessories,139,Audio / Video,33,Electrical
+729,Paper,441,Cat Litter,45,Cat Litter
+730,Pies Party,446,Pies,98,Frozen Pies & Pastries
+731,Family Mainstream,332,Family,107,Frozen Pizza
+732,Mexican Spices,20,Mexican Food,70,International Food
+733,Family Premium,332,Family,107,Frozen Pizza
+734,Ladies Socks,193,Ladieswear,79,Apparel
+735,Small Multi Packs,19,Multi Packs,43,Snacks
+736,Caesar Salad Dressing,15,Dressings & Mayonnaises,16,Condiments
+737,Flavoured / Aioli Mayonnaise,15,Dressings & Mayonnaises,16,Condiments
+738,Men's Aerosol,472,Aerosol,42,Deodorants
+739,Long Life Non - Dairy,228,Milk & Cream - Long Life,122,Beverages
+740,Pink Salmon Small Can (<=95g),412,Salmon,108,Canned Seafood
+741,Sport Liquid,2,Health Food Weight Management,17,Health Food
+742,Antiseptics,447,First Aid,4,Medicinal
+743,Sundry Shampoo,485,Shampoo,66,Hair Care
+744,Poultry Feed,40,Small Animal Food,89,Small Animal Food
+745,Large Blocks,147,Blocks,121,Confectionery
+746,Candles / Sparklers,122,Partyware,61,Party
+747,Rubs / Ointments / Lincture,134,Sports,4,Medicinal
+748,Lipstick,185,Lips,41,Cosmetics
+749,Fruit / Sweet Pies Family,176,Fruit / Sweet Pies,115,Frozen Desserts
+750,Summer - General,264,Summer,39,Seasonal
+751,Sundry Savoury Biscuits,259,Savoury Biscuits,15,Biscuits
+752,Yoghurt Powder,191,Desserts,34,Desserts & Toppings
+753,Premium Toilet Tissue,415,Toilet Tissue,145,Toilet Tissue
+754,101-250g Sliced Meats,55,Sliced Meat Pre-Packed,105,Smallgoods - Pre-Packed
+755,Traditional Mayonnaise,15,Dressings & Mayonnaises,16,Condiments
+756,Ready to Eat,474,Popcorn,43,Snacks
+757,>501g Shortcut Bacon,382,Bacon Pre-Packed,105,Smallgoods - Pre-Packed
+758,Frozen Pies & Pastries Sundry,483,Frozen Pies & Pastries Sundry,98,Frozen Pies & Pastries
+759,Peanut Butter,399,Savoury Spreads,143,Spreads
+760,Bathroom Liquid / Gel,362,Bathroom,21,Household Cleaners
+761,Short Crust,180,Frozen Bread & Pastry,112,Frozen Bread & Pastry
+762,Poultry Free Range Kebabs,328,Poultry Free Range,120,Poultry
+763,Pastry Frozen Food Service,159,Pastry Food Service,116,Frozen Food Service
+764,Artisan/Whole Egg Pasta,7,Pasta,10,Grains & Pasta
+765,Men's Pads,333,Pads,30,Incontinence
+766,Instant Finishing Sauce,114,Gravy & Finishing Sauce,16,Condiments
+767,Cereal,157,Food,27,Baby
+768,Take Home Tubs Mainstream,255,Take Home Tubs,6,Ice Cream
+769,Brie & Camembert,330,Speciality Cheese,148,Cheese
+770,Bathroom Wipes,362,Bathroom,21,Household Cleaners
+771,Fruit Bars,392,Other Nutritional Snacks,90,Nutritional Snacks
+772,Singles Mainstream,475,Singles,6,Ice Cream
+773,Poultry Frozen Food Service,329,Poultry Frozen Food Service,116,Frozen Food Service
+774,Sundry Meal Bases,163,Meal Bases,16,Condiments
+775,Paper Bags,69,Bags - Store Use,146,Store Use Supplies
+776,Seasonal - Appliances / Electrical,58,Seasonal - Other,39,Seasonal
+777,Value / Family Shampoo,485,Shampoo,66,Hair Care
+778,Meals - Varieties,372,Meals - Varieties,97,Meals
+779,Seasonal - Manchester,58,Seasonal - Other,39,Seasonal
+780,Sundry Pool Chemicals & Pool Needs,199,Pool Chemicals & Pool Needs,102,Outdoor / Leisure
+781,Health Powder,2,Health Food Weight Management,17,Health Food
+782,Sundry Haberdashery,201,Haberdashery,53,Haberdashery
+783,Cucumbers & Gherkins Condiments,74,Pickled Vegetables,16,Condiments
+784,Small Blocks,147,Blocks,121,Confectionery
+785,Sundry Mexican Food,20,Mexican Food,70,International Food
+786,Pet Accessories Sundry,43,Pet Accessories Sundry,140,Pet Accessories
+787,Small Bars,241,Bars,121,Confectionery
+788,Sundry Dog / Cat,138,Dog / Cat,140,Pet Accessories
+789,Chilled Dog Food Bulk Roll,213,Chilled Dog Food,104,Pet Food
+790,Vegetable Mix,351,Value Add Vegetable,47,Value Add Produce
+791,Aerosol Cream,207,Cream,62,Cream
+792,Energy Drinks Multipack Can >= 500ml,54,Energy Drinks - Multipack,99,Energy Drinks
+793,Oral Care Sundry,31,Oral Care Sundry,138,Oral Care
+794,Sundry Greek Yoghurt,388,Greek Yoghurt,134,Yoghurts
+795,Packaged Health & Wellbeing Snacks,396,Packaged Health & Wellbeing,12,Packaged
+796,Mixers Bottle,365,Mixers,55,Soft Drinks
+797,Tablets / Capsules / Caplets Cough & Col,130,Cough & Cold,4,Medicinal
+798,Hash Browns,500,Frozen Potato,37,Frozen Potato
+799,Bubbles & Novelty Toys,366,Christmas - Toys,39,Seasonal
+800,Economy Wet Cat Food,267,Wet Cat Food,11,Cat Food
+801,Premium Health Wet Dog Food,172,Wet Dog Food,86,Dog Food
+802,Paracetamol,465,Analgesics,4,Medicinal
+803,Rinse Aid,200,Rinse Aid,94,Dishwashing
+804,Non-Alcoholic Beer,276,Non-Alcoholic Beverages All,24,Non Alcoholic Beverages
+805,Wax,468,Depilatories,87,Women's Hair Removal
+806,Snack Mainstream,179,Snack,107,Frozen Pizza
+807,Packaged Seasonal Xmas Cakes,436,Packaged Seasonal,12,Packaged
+808,Table Salt,379,Herbs & Spices,73,Cooking Needs
+809,Lamb Racks Extra Trim,319,Lamb Racks,117,Lamb
+810,Multipacks Facial Tissues,463,Facial Tissues,147,Facial Tissues
+811,Coffee Premium,13,Soluble Coffee,28,Coffee
+812,Ibuprofen,465,Analgesics,4,Medicinal
+813,Sundry Vegetarian,91,Vegetarian,7,Frozen Dietary
+814,Rabbit / Guinea Pig Feed,40,Small Animal Food,89,Small Animal Food
+815,Food Drinks,187,Milk & Water Modifiers,122,Beverages
+816,Facial Skincare Toner,456,Facial Skincare,83,Skincare
+817,Multi Vitamins,292,Vitamins,52,Vitamins & Supplements
+818,Kerosene,389,Cleaners - Spirits,21,Household Cleaners
+819,Shortbread,175,Sweet Biscuits,15,Biscuits
+820,Cooking Bags,252,Bags,139,Paper Goods
+821,Packaged Breads Loaves,339,Packaged Breads,12,Packaged
+822,Coffee Essence,327,Coffee Accessories,28,Coffee
+823,Women's Underwear,145,Underwear,30,Incontinence
+824,Proprietary Breads International,387,Proprietary Breads,36,Proprietary
+825,Summer - Apparel & Headwear,264,Summer,39,Seasonal
+826,Produce Egg,121,Produce Egg,22,Produce Egg
+827,Whole Peeled,486,Tomatoes,40,Vegetables & Salads
+828,Asian Savouries Party,8,Asian Snacks,91,Frozen Snack/Entertaining
+829,Men's Stick,217,Stick,42,Deodorants
+830,Single Fruit - Pineapple - Syrup,417,Fruit - Syrup,44,Fruit
+831,Pasta Sauce,196,Pasta Sauce,16,Condiments
+832,Custards,473,Chilled Desserts,132,Desserts
+833,Liquid Laundry Regular,128,Laundry,21,Household Cleaners
+834,Medication,491,Stomach & Bowel,4,Medicinal
+835,Pies Frozen Food Service,271,Pies Food Service,116,Frozen Food Service
+836,Sundry Dog Treats,119,Dog Treats,86,Dog Food
+837,Water Ice,191,Desserts,34,Desserts & Toppings
+838,Sundry Kitchen,294,Kitchen,21,Household Cleaners
+839,Men's Roll-on / Sticks,97,Men's Deodorants,137,Mens Grooming
+840,Beef Tenderloin Production Primal,464,Beef Tenderloin,114,Beef
+841,Pesticides Gardening,321,Gardening,48,Gardening Products
+842,Pesto,196,Pasta Sauce,16,Condiments
+843,Sundry Cold Desserts,183,Cold Desserts,115,Frozen Desserts
+844,Mexican Meal Kits,20,Mexican Food,70,International Food
+845,Gels,460,Hair Styling,50,Hair Styling
+846,Take Home Tubs Premium,255,Take Home Tubs,6,Ice Cream
+847,Small Juices (<1l),98,Juices,54,Chilled Juices & Drinks
+848,Small Modified White Milk (< 1l),280,Modified White Milk,1,Milk
+849,Premium Juice <=1l,222,Premium Juice,49,Juice
+850,Seafood Frozen Fish Fillet Raw,142,Seafood Frozen,5,Seafood
+851,Passata,196,Pasta Sauce,16,Condiments
+852,In-Store Bakery Breads Loaves,370,In-Store Bakery Breads,119,In Store Bakery
+853,Sundry Disinfectants,462,Disinfectants,21,Household Cleaners
+854,Powerboards / Leads,263,Electrical Accessories,33,Electrical
+855,Medicinal Sundry,214,Medicinal Sundry,4,Medicinal
+856,Icings,431,Baking Needs,73,Cooking Needs
+857,Proprietary Snacks Muffins,406,Proprietary Snacks,36,Proprietary
+858,Fruit Based Small Juices (<1l),434,Drinks,54,Chilled Juices & Drinks
+859,Beef Value Added Steaks,322,Beef Value Added,114,Beef
+860,Regular Eggs,123,Eggs,130,Eggs
+861,Two Fruit - Juice,314,Fruit - Juice,44,Fruit
+862,Lotions / Creams,447,First Aid,4,Medicinal
+863,Facial Skincare Moisturiser / Lotions,456,Facial Skincare,83,Skincare
+864,Value Add Burgers Beef,297,Value Add Meat Burgers,59,Value Add Meat
+865,Vegetable Prepared,351,Value Add Vegetable,47,Value Add Produce
+866,Single Liquid Hand Wash,424,Liquid Hand Wash,71,Soap & Bath
+867,Proprietary Breads Flat,387,Proprietary Breads,36,Proprietary
+868,Sundry Seafood Frozen,142,Seafood Frozen,5,Seafood
+869,Proprietary Breads White,387,Proprietary Breads,36,Proprietary
+870,Pouch Condensed,204,Condensed,68,Soups
+871,Fruit Strips,392,Other Nutritional Snacks,90,Nutritional Snacks
+872,Fruit Biscuits,175,Sweet Biscuits,15,Biscuits
+873,Beef Trim Mince,363,Beef Trim,114,Beef
+874,Healthy - Tray,4,Healthy,96,Frozen Meals
+875,Coffee Beans,489,Roast & Ground Coffee,28,Coffee
+876,2 in 1 Shampoo,485,Shampoo,66,Hair Care
+877,Multipack Frozen Yogurt,494,Multipack,6,Ice Cream
+878,Dessert - Single,242,Dessert - Single,123,Dessert
+879,Corn Chips,356,Corn & Dips,43,Snacks
+880,Plant Based Soup,238,Plant Based Add Ons,103,Chilled Health
+881,Moisturising,340,Lipcare,58,Sun Care
+882,Sundry Analgesics,465,Analgesics,4,Medicinal
+883,Pasta Salads Deli,167,Salads - Deli,38,Delicatessen
+884,Tableware,345,Christmas - General,39,Seasonal
+885,Essences,431,Baking Needs,73,Cooking Needs
+886,Potato Salad Dressing,15,Dressings & Mayonnaises,16,Condiments
+887,Plant Pots,28,Garden Hardware,48,Gardening Products
+888,Value Lines,323,Value Lines,32,Value Lines
+889,Lamb Sundry,195,Lamb Sundry,117,Lamb
+890,Premium Taste Wet Dog Food,172,Wet Dog Food,86,Dog Food
+891,Mustard Sauce,316,Table Sauces,16,Condiments
+892,Health Liquid,2,Health Food Weight Management,17,Health Food
+893,Body Care Oils,413,Body Care,83,Skincare
+894,Folders / Refills / Files,221,School / Home Stationery,3,Stationery
+895,Yeast,208,Flour & Bread Mix,73,Cooking Needs
+896,Mainstream Wet Cat Food,267,Wet Cat Food,11,Cat Food
+897,Packaged Seasonal Easter Buns,436,Packaged Seasonal,12,Packaged
+898,General Merchandise Food Service,295,General Merchandise Food Service,126,General Merchandise Food Service
+899,Sundry Snacks Frozen Food Service,467,Snacks Food Service,116,Frozen Food Service
+900,Dry Herbs,379,Herbs & Spices,73,Cooking Needs
+901,Paints,184,Hardware,128,Hardware
+902,Snack Packs,335,Dried Fruit & Nuts,73,Cooking Needs
+903,Wrapping Bows,219,Cards & Wrapping,3,Stationery
+904,Cream Cheese,404,Other Cheese,148,Cheese
+905,Plain Flour,208,Flour & Bread Mix,73,Cooking Needs
+906,Specialty Rubber Gloves,22,Rubber Gloves,35,Household Cleaning General Merchandise
+907,Bandages,447,First Aid,4,Medicinal
+908,Chips / Wedges,500,Frozen Potato,37,Frozen Potato
+909,Paste,399,Savoury Spreads,143,Spreads
+910,Disposable Gloves,22,Rubber Gloves,35,Household Cleaning General Merchandise
+911,Everyday Muesli,113,Muesli,93,Breakfast Foods
+912,Sundry Electrical Accessories,263,Electrical Accessories,33,Electrical
+913,Sundry Kitchenware,224,Kitchenware,8,Housewares
+914,Baked Beans,229,Canned Baked Beans & Spaghetti,69,Hot & Cold Meals
+915,Tuna Large Can (>95g),117,Tuna,108,Canned Seafood
+916,Head Phones,139,Audio / Video,33,Electrical
+917,Laundry Liquid Pods & Capsules,128,Laundry,21,Household Cleaners
+918,Household Appliances,151,Appliances,33,Electrical
+919,Sundry Aerosol,472,Aerosol,42,Deodorants
+920,Cutting Boards,224,Kitchenware,8,Housewares
+921,Boys Toys,366,Christmas - Toys,39,Seasonal
+922,Candles,345,Christmas - General,39,Seasonal
+923,Prepack Salads - Protein,77,Prepack Salads - Protein,141,Prepack Salads
+924,Full Cream Regular Yoghurt,66,Regular Yoghurt,134,Yoghurts
+925,Loose Dinnerware Crockery,411,Crockery,8,Housewares
+926,Men's Systems,156,Men's Blades & Razors,137,Mens Grooming
+927,Flea Control,138,Dog / Cat,140,Pet Accessories
+928,Sundry Carpet,65,Carpet,21,Household Cleaners
+929,Pre Packed Sliced / Shaved Meats,45,Sliced / Shaved Meats,38,Delicatessen
+930,Energy Drinks Singles Can < 500ml,262,Energy Drinks - Singles,99,Energy Drinks
+931,Travel Kits,451,Travel,111,Travel
+932,Sundry Packaged Biscuits / Cookies,153,Packaged Biscuits / Cookies,12,Packaged
+933,Sundry Laundry,128,Laundry,21,Household Cleaners
+934,Poultry Fresh Value Added Pieces,393,Poultry Fresh Value Added,120,Poultry
+935,Hardware Sundry,487,Hardware Sundry,128,Hardware
+936,501-750g Cheese Blocks,265,Cheese Blocks,148,Cheese
+937,TV Accessories,263,Electrical Accessories,33,Electrical
+938,Long Life Milk 1l,228,Milk & Cream - Long Life,122,Beverages
+939,Sundry Eyes,203,Eyes,41,Cosmetics
+940,Licensed Boys Toys,349,Licensed Toys,18,Toys
+941,Winter - Pet,27,Winter,39,Seasonal
+942,Seafood Frozen Surimi,142,Seafood Frozen,5,Seafood
+943,Confectionery Food Service,454,Chocolate & Confectionery Food Service,101,Dry Grocery Food Service
+944,Grains & Pasta Sundry,403,Grains & Pasta Sundry,10,Grains & Pasta
+945,Roast Potatoes,500,Frozen Potato,37,Frozen Potato
+946,Skim Milk Powdered,301,Milk Powdered - Long Life,122,Beverages
+947,Powder / Tablets Laundry,128,Laundry,21,Household Cleaners
+948,Custard,191,Desserts,34,Desserts & Toppings
+949,"Seafood Frozen Calamari, Octopus & Squid",142,Seafood Frozen,5,Seafood
+950,Gravies Food Service,407,Gravy & Sauce Mixes Food Service,101,Dry Grocery Food Service
+951,Sundry Dry Dog Food,103,Dry Dog Food,86,Dog Food
+952,Proprietary Breads Grain,387,Proprietary Breads,36,Proprietary
+953,Dried Fruit & Nuts Sundry,391,Dried Fruit & Nuts Sundry,60,Dried Fruit & Nuts
+954,Poultry Free Range Stir Fry Diced,328,Poultry Free Range,120,Poultry
+955,Can Ready To Eat,376,Ready To Eat,68,Soups
+956,Baby Bath,3,Toiletries,27,Baby
+957,Packaged Continental Cakes,226,Packaged Cakes,12,Packaged
+958,Sundry Stock,244,Stock,73,Cooking Needs
+959,Value Add Rissoles & Meatballs Beef,16,Value Add Meat Rissoles & Meatballs,59,Value Add Meat
+960,Sundry Denture Care,414,Denture Care,138,Oral Care
+961,Streamers / Confetti,122,Partyware,61,Party
+962,Sparkling Plain Singles < = 600ml,449,Sparkling Water,57,Water
+963,Nuts Pre Pack,240,Nuts Mix,60,Dried Fruit & Nuts
+964,Sundry Automatic,173,Automatic,94,Dishwashing
+965,Granulated Gravy,114,Gravy & Finishing Sauce,16,Condiments
+966,Economy Automatic,173,Automatic,94,Dishwashing
+967,Cider Vinegars,100,Vinegars,16,Condiments
+968,Sundry Speciality Cheese,330,Speciality Cheese,148,Cheese
+969,Capers Condiments,74,Pickled Vegetables,16,Condiments
+970,Liquid Stock,244,Stock,73,Cooking Needs
+971,Jam,307,Sweet Spreads,143,Spreads
+972,Meals Hot Deli,298,Hot Food,38,Delicatessen
+973,Clusters / Granola,113,Muesli,93,Breakfast Foods
+974,Sugar Snap,305,Pea,81,Vegetable
+975,Healthy - Plated,4,Healthy,96,Frozen Meals
+976,<=250g Shredded Cheese,104,Shredded Cheese,148,Cheese
+977,Potato Brushed Pre Pack,286,Potato,127,Hard Produce
+978,Sports Drinks Bottle Singles <= 600ml,72,Sports Drinks - Bottle,67,Sports Drinks
+979,Lamb Rumps Retail Ready,246,Lamb Rumps,117,Lamb
+980,Family Non-Dairy Milk (>= 1l),251,Non-Dairy Milk,1,Milk
+981,Sundry Ready Prepared Meals,390,Ready Prepared Meals,38,Delicatessen
+982,Brown Vinegars,100,Vinegars,16,Condiments
+983,Red Skin Frankfurts,152,Frankfurts / Smoked,38,Delicatessen
+984,Balloons,122,Partyware,61,Party
+985,Spray,44,Nicotine Replacement Treatment,4,Medicinal
+986,Car Air Fresheners / Deodorisers,304,Car Care,25,Automotive
+987,Facial Skincare Serums,456,Facial Skincare,83,Skincare
+988,Sunscreens Lotion,32,Sunscreens,58,Sun Care
+989,Window Wipes,24,Window,21,Household Cleaners
+990,Beans & Ground Coffees Food Service,477,Coffee Food Service,14,Beverages Food Service
+991,Value Add Sausages Lamb,5,Value Add Meat Sausages,59,Value Add Meat
+992,Fly Sprays,36,Insecticides,85,Household Needs
+993,Mainstream Wet Dog Food,172,Wet Dog Food,86,Dog Food
+994,Furniture & Office Stationery,439,Office Stationery,3,Stationery
+995,Car Wash,304,Car Care,25,Automotive
+996,Cookies,175,Sweet Biscuits,15,Biscuits
+997,Lubricants,192,Sexual Health,4,Medicinal
+998,"Nuts, Cooking",335,Dried Fruit & Nuts,73,Cooking Needs
+999,Single Fruit Other - Juice,314,Fruit - Juice,44,Fruit
+1000,Sundry Winter,27,Winter,39,Seasonal
+1001,Oats Satchets,206,Hot Cereals,93,Breakfast Foods
+1002,Diced / Pieces Bacon Deli,233,Bacon,38,Delicatessen
+1003,Canola Oil,107,Oils,73,Cooking Needs
+1004,Jumbo Nappies,383,Nappies,27,Baby
+1005,Poultry Fresh Value Added,158,Poultry Standard Fresh,120,Poultry
+1006,Oyster,495,Other Canned Seafood,108,Canned Seafood
+1007,Natural Poultry - Duck,354,Natural Poultry,31,Frozen Poultry
+1008,Premium Health Wet Cat Food,267,Wet Cat Food,11,Cat Food
+1009,Winter - Outdoor,27,Winter,39,Seasonal
+1010,Adhesive Tapes / Glues / Post Notes,221,School / Home Stationery,3,Stationery
+1011,Peas Frozen Food Service,480,Vegetables Frozen Food Service,116,Frozen Food Service
+1012,Generic Toys - General,194,Generic Toys,18,Toys
+1013,Rice Basmati,188,Grains,10,Grains & Pasta
+1014,Lollipop Single,481,Kids,121,Confectionery
+1015,Microwavable,188,Grains,10,Grains & Pasta
+1016,Cooking Chocolate,431,Baking Needs,73,Cooking Needs
+1017,Family Blocks,147,Blocks,121,Confectionery
+1018,Asian Drinks,225,Asian Food,70,International Food
+1019,Women's Roll-on,211,Roll-On,42,Deodorants
+1020,Franks,30,Other Smallgoods - Pre-Packed,105,Smallgoods - Pre-Packed
+1021,Adult Snacking Cheese,216,Snacking Cheese,148,Cheese
+1022,Packaged Mud Cakes,226,Packaged Cakes,12,Packaged
+1023,Value Add Burgers Kangaroo,297,Value Add Meat Burgers,59,Value Add Meat
+1024,Single Packet,245,Packet,68,Soups
+1025,Coffee Mainstream,13,Soluble Coffee,28,Coffee
+1026,Sundry Brushware,18,Brushware,35,Household Cleaning General Merchandise
+1027,Bbqs / BBQ Fuel,161,Barbecue / Coolers / Picnic,102,Outdoor / Leisure
+1028,Summer - Outdoor,264,Summer,39,Seasonal
+1029,Fruit Based Large Juices (>=1l),434,Drinks,54,Chilled Juices & Drinks
+1030,Ice Cream Cones & Wafers,191,Desserts,34,Desserts & Toppings
+1031,Mainstream Automatic,173,Automatic,94,Dishwashing
+1032,Sundry Tomato Products,486,Tomatoes,40,Vegetables & Salads
+1033,Dry Pasta,7,Pasta,10,Grains & Pasta
+1034,Sundry Singles,475,Singles,6,Ice Cream
+1035,Coffee Capsules,234,Coffee Capsules,28,Coffee
+1036,Semi Hard Cheese Deli,452,Cheese - Deli,38,Delicatessen
+1037,Travel Personal Care,451,Travel,111,Travel
+1038,Prepared Fruit,60,Prepared Fruit,47,Value Add Produce
+1039,Non-Dairy Chilled Spreads,416,Other Chilled Spreads,100,Chilled Spreads
+1040,Tubs Butter,374,Butter,100,Chilled Spreads
+1041,Frozen Bread & Pastry Sundry,257,Frozen Bread & Pastry Sundry,112,Frozen Bread & Pastry
+1042,Sundry Christmas - Toys,366,Christmas - Toys,39,Seasonal
+1043,Disposable - Drinkware / Straws,341,Disposable Tableware,129,Disposable
+1044,Coconut Milk / Cream,353,Other Cooking Needs,73,Cooking Needs
+1045,Floss / String,57,Interdental,138,Oral Care
+1046,Licensed Toys - General,349,Licensed Toys,18,Toys
+1047,Salmon Ready To Eat Meal Kits,412,Salmon,108,Canned Seafood
+1048,Whipped Cream,207,Cream,62,Cream
+1049,Onions Condiments,74,Pickled Vegetables,16,Condiments
+1050,Gluten Free Pasta,7,Pasta,10,Grains & Pasta
+1051,Sauce Liquid,114,Gravy & Finishing Sauce,16,Condiments
+1052,Indian Spices,162,Indian Food,70,International Food
+1053,Brooms With Handles,18,Brushware,35,Household Cleaning General Merchandise
+1054,Small Full Cream Plain Milk (< 1l),334,Full Cream Plain Milk,1,Milk
+1055,Budget Shampoo,485,Shampoo,66,Hair Care
+1056,Food Storage,397,Food Storage,8,Housewares
+1057,Continuity Promotions Sundry,429,Continuity Promotions Sundry,64,Continuity Promotions
+1058,Single Fruit - Other - Syrup,417,Fruit - Syrup,44,Fruit
+1059,Chicken Portions Cooked Sliced Deli,45,Sliced / Shaved Meats,38,Delicatessen
+1060,Pasta Small,51,Side Dishes,69,Hot & Cold Meals
+1061,Can Condensed,204,Condensed,68,Soups
+1062,Timers Electrical,263,Electrical Accessories,33,Electrical
+1063,Sundry Multipack,494,Multipack,6,Ice Cream
+1064,Beef Veal Sets,126,Beef Veal,114,Beef
+1065,Boys Socks,177,Boyswear,79,Apparel
+1066,Party Hats / Masks,122,Partyware,61,Party
+1067,Sundry Shoe Care,275,Shoe Care,85,Household Needs
+1068,Short Cut Bacon Deli,233,Bacon,38,Delicatessen
+1069,Auto Head Toothbrushes,457,Toothbrushes,138,Oral Care
+1070,Pork Collar Butts Production Primal,428,Pork Collar Butts,74,Pork
+1071,Sundry Salad,115,Salad,47,Value Add Produce
+1072,Beef Specialty Organic,106,Beef Specialty,114,Beef
+1073,Rice Puddings,191,Desserts,34,Desserts & Toppings
+1074,Soft Drink Can Multipack >=10pk,299,Soft Drinks,55,Soft Drinks
+1075,Signage - Store,324,Non-Stock Fixtures,110,Non-Stock Fixtures
+1076,Sundry Other Seafood,401,Other Seafood,51,Frozen Seafood
+1077,Plant Based Roasts,459,Plant Based Smallgoods,103,Chilled Health
+1078,Foot Treatments,111,Footcare,4,Medicinal
+1079,Wafers,175,Sweet Biscuits,15,Biscuits
+1080,Medicated Soap,41,Soap & Bath,71,Soap & Bath
+1081,Premium Taste Dry Dog Food,103,Dry Dog Food,86,Dog Food
+1082,Bags Marshmallow,272,Sugar - Bags,121,Confectionery
+1083,Sundry Other Yoghurt,99,Other Yoghurt,134,Yoghurts
+1084,Pork Sliced Deli,45,Sliced / Shaved Meats,38,Delicatessen
+1085,Mousse Desserts,473,Chilled Desserts,132,Desserts
+1086,Sundry Canned Meats & Meal,61,Canned Meats & Meal,69,Hot & Cold Meals
+1087,Super Premium Wet Cat Food,267,Wet Cat Food,11,Cat Food
+1088,Salami - Knob,94,Salami Pre-Packed,105,Smallgoods - Pre-Packed
+1089,Nuts & Jerky Sundry,502,Nuts & Jerky Sundry,133,Nuts & Jerky
+1090,Fabric Softeners,128,Laundry,21,Household Cleaners
+1091,Packaged Breads Bagels,339,Packaged Breads,12,Packaged
+1092,Sundry Herbs & Spices,379,Herbs & Spices,73,Cooking Needs
+1093,Salsa,356,Corn & Dips,43,Snacks
+1094,Pre Packed Olives / Brines Deli,160,Olives / Brines Deli,38,Delicatessen
+1095,Mineral Turpentine,389,Cleaners - Spirits,21,Household Cleaners
+1096,Sundry Store Use Supplies,220,Store Use Supplies,146,Store Use Supplies
+1097,Spaghetti/Pasta-Dry Food Service,135,Cake & Cooking Needs Food Service,101,Dry Grocery Food Service
+1098,Kabanas,152,Frankfurts / Smoked,38,Delicatessen
+1099,Plant Based Tofu,238,Plant Based Add Ons,103,Chilled Health
+1100,Pork Belly Retail Ready,359,Pork Belly,74,Pork
+1101,Scrub Brushes,18,Brushware,35,Household Cleaning General Merchandise
+1102,Single Pack - Snacking,425,Fruit - Snacking,44,Fruit
+1103,Oils/Shortenings Food Service,135,Cake & Cooking Needs Food Service,101,Dry Grocery Food Service
+1104,Continental Sausages Deli,344,Sausages,38,Delicatessen
+1105,Xmas Gifting,10,Xmas Seasonal,125,Seasonal Lines
+1106,Towels,253,Manchester,106,Manchester
+1107,Blonding,478,Hair Colour,131,Hair Colour
+1108,Packaged Breads Sourdough,339,Packaged Breads,12,Packaged
+1109,Green,38,Teas,122,Beverages
+1110,Sundry Frozen Vegetables,83,Frozen Vegetables,82,Frozen Vegetables
+1111,Sundry Non-Alcoholic Beverages All,276,Non-Alcoholic Beverages All,24,Non Alcoholic Beverages
+1112,Small Non-Dairy Milk (< 1l),251,Non-Dairy Milk,1,Milk
+1113,Hair Styling Sundry,337,Hair Styling Sundry,50,Hair Styling
+1114,Maternity Sanitary Pads,296,Sanitary Pads,29,Feminine Hygiene
+1115,Sundry Processed Chicken,422,Processed Chicken,31,Frozen Poultry
+1116,Cooked Salamis,358,Salamis,38,Delicatessen
+1117,Lunch Boxes,397,Food Storage,8,Housewares
+1118,Women's Body Spray / Cologne,250,Body Spray / Cologne,42,Deodorants
+1119,Lamb Legs Retail Ready,300,Lamb Legs,117,Lamb
+1120,Fish Flakes,40,Small Animal Food,89,Small Animal Food
+1121,Sundry Pizza - Value,461,Pizza - Value,46,Pizza
+1122,Other Seafood Battered / Crumbed,401,Other Seafood,51,Frozen Seafood
+1123,Family Modified White Milk (>= 1l),280,Modified White Milk,1,Milk
+1124,Sundry Pickled Vegetables,74,Pickled Vegetables,16,Condiments
+1125,Litter Accessories,138,Dog / Cat,140,Pet Accessories
+1126,Oats Bulk,206,Hot Cereals,93,Breakfast Foods
+1127,Rubber Gloves,22,Rubber Gloves,35,Household Cleaning General Merchandise
+1128,Sausage Rolls Party,197,Sausage Rolls,98,Frozen Pies & Pastries
+1129,Ricotta,404,Other Cheese,148,Cheese
+1130,Facial Skincare Scrubs,456,Facial Skincare,83,Skincare
+1131,Proprietary Snacks Pancakes & Pikelets,406,Proprietary Snacks,36,Proprietary
+1132,Bowl Noodles,154,Noodles,69,Hot & Cold Meals
+1133,Treatments,484,Treatments,66,Hair Care
+1134,Pork Racks Production Primal,29,Pork Racks,74,Pork
+1135,Plant Based Fresh Pasta,310,Plant Based Misc,103,Chilled Health
+1136,Sundry Indian Food,162,Indian Food,70,International Food
+1137,Sundry Mainstream Potato,350,Mainstream Potato,43,Snacks
+1138,Ham Canned,61,Canned Meats & Meal,69,Hot & Cold Meals
+1139,Freezer Bags,252,Bags,139,Paper Goods
+1140,Condoms,192,Sexual Health,4,Medicinal
+1141,Packaged Pastries Savoury,279,Packaged Pastries,12,Packaged
+1142,Sundry Milk & Cream - Long Life,228,Milk & Cream - Long Life,122,Beverages
+1143,Asian Savouries Snack,8,Asian Snacks,91,Frozen Snack/Entertaining
+1144,Fathers Day,313,Seasonal Events,39,Seasonal
+1145,Premium Shampoo,485,Shampoo,66,Hair Care
+1146,Beef Chuck Roll Production Primal,273,Beef Chuck Roll,114,Beef
+1147,Women's Shaving Preparations,269,Women's Blades & Razors,87,Women's Hair Removal
+1148,Ultra Concentrated Manual,190,Manual,94,Dishwashing
+1149,Turkey Sliced Deli,45,Sliced / Shaved Meats,38,Delicatessen
+1150,Sundry Body Care,413,Body Care,83,Skincare
+1151,Rice Bran Oil,107,Oils,73,Cooking Needs
+1152,Winter - Wet Weather,27,Winter,39,Seasonal
+1153,Packaged Muffins Sweet,371,Packaged Muffins,12,Packaged
+1154,Poultry Fresh Offal,158,Poultry Standard Fresh,120,Poultry
+1155,Stir Through,196,Pasta Sauce,16,Condiments
+1156,Sponges & Cloths,84,Cleaning Materials,142,Cleaning Materials
+1157,Cookware,224,Kitchenware,8,Housewares
+1158,Pieces Bacon,382,Bacon Pre-Packed,105,Smallgoods - Pre-Packed
+1159,Pre Packed Pasta Deli,25,Pasta - Deli,38,Delicatessen
+1160,<=250g Regular Bacon,382,Bacon Pre-Packed,105,Smallgoods - Pre-Packed
+1161,Tools Garden,28,Garden Hardware,48,Gardening Products
+1162,Seafood Frozen Raw Prawns Peeled,142,Seafood Frozen,5,Seafood
+1163,Bags Liquorice,272,Sugar - Bags,121,Confectionery
+1164,Metal Polish,132,Polishes,21,Household Cleaners
+1165,Fruits Dried,335,Dried Fruit & Nuts,73,Cooking Needs
+1166,Sausage Rolls Snack,197,Sausage Rolls,98,Frozen Pies & Pastries
+1167,Asian Snacks,225,Asian Food,70,International Food
+1168,Men's Cleansers / Scrubs,230,Men's Skincare,137,Mens Grooming
+1169,251-500g Shortcut Bacon,382,Bacon Pre-Packed,105,Smallgoods - Pre-Packed
+1170,>251g Sliced Meats,55,Sliced Meat Pre-Packed,105,Smallgoods - Pre-Packed
+1171,Pancake & Pikelet Mix,320,Bakery Mix,73,Cooking Needs
+1172,Nail Varnish,287,Nail,41,Cosmetics
+1173,Baking & Storage,345,Christmas - General,39,Seasonal
+1174,Gloves Gardening,28,Garden Hardware,48,Gardening Products
+1175,Chinese Sauces & Paste,170,Chinese Food,70,International Food
+1176,Mussel,495,Other Canned Seafood,108,Canned Seafood
+1177,Nuggets,422,Processed Chicken,31,Frozen Poultry
+1178,Assortments Chocolate Food Service,454,Chocolate & Confectionery Food Service,101,Dry Grocery Food Service
+1179,Potato Brushed Loose,286,Potato,127,Hard Produce
+1180,Eye Liner,203,Eyes,41,Cosmetics
+1181,Men's Colourants,346,Men's Hair Care,137,Mens Grooming
+1182,Plant Based Milk,310,Plant Based Misc,103,Chilled Health
+1183,Smallgoods Bacon Economy,342,Smallgoods Bacon,135,Smallgoods
+1184,Hoses,28,Garden Hardware,48,Gardening Products
+1185,Sundry Sweet Biscuits,175,Sweet Biscuits,15,Biscuits
+1186,Pool Chemicals,199,Pool Chemicals & Pool Needs,102,Outdoor / Leisure
+1187,Other Nuts,120,Nuts & Jerky,133,Nuts & Jerky
+1188,Correction Fluid / Tapes,221,School / Home Stationery,3,Stationery
+1189,Energy / Stress,292,Vitamins,52,Vitamins & Supplements
+1190,Small Flavoured Milk (< 1l),186,Flavoured Milk,1,Milk
+1191,Beef Topside Retail Ready,92,Beef Topside,114,Beef
+1192,Sundry Wraps & Foils,364,Wraps & Foils,139,Paper Goods
+1193,Batteries,174,Batteries / Flashlights,33,Electrical
+1194,Girls Underwear,171,Girlswear,79,Apparel
+1195,Large Multi Packs,19,Multi Packs,43,Snacks
+1196,Coffee Whiteners,327,Coffee Accessories,28,Coffee
+1197,Worming,138,Dog / Cat,140,Pet Accessories
+1198,Yeast Extracts,399,Savoury Spreads,143,Spreads
+1199,Sundry Proprietary Breads,387,Proprietary Breads,36,Proprietary
+1200,Pork Loin Retail Ready,141,Pork Loin,74,Pork
+1201,Crab / Prawns / Lobster,495,Other Canned Seafood,108,Canned Seafood
+1202,Bags Chocolate Coated,272,Sugar - Bags,121,Confectionery
+1203,Energy Drinks Singles Bottle < 500ml,262,Energy Drinks - Singles,99,Energy Drinks
+1204,Automotive Oils,34,Automotive Lubricants,25,Automotive
+1205,Sour Cream,207,Cream,62,Cream
+1206,Knobs,30,Other Smallgoods - Pre-Packed,105,Smallgoods - Pre-Packed
+1207,Health Food Snacks Sweet,293,Health Food Snacks,17,Health Food
+1208,Soaps Laundry,128,Laundry,21,Household Cleaners
+1209,Women's Vitamins,292,Vitamins,52,Vitamins & Supplements
+1210,Dental / Health,119,Dog Treats,86,Dog Food
+1211,French Salad Dressing,15,Dressings & Mayonnaises,16,Condiments
+1212,Ice Cream Sundry,311,Ice Cream Sundry,6,Ice Cream
+1213,Sundry Seafood Bulk Frozen,291,Seafood Bulk Frozen,5,Seafood
+1214,Men's Disposable Razors,156,Men's Blades & Razors,137,Mens Grooming
+1215,Sundry Health Food Weight Management,2,Health Food Weight Management,17,Health Food
+1216,Frozen Fish Food Service,112,Seafood Frozen Food Service,116,Frozen Food Service
+1217,Seafood Frozen Crustaceans,142,Seafood Frozen,5,Seafood
+1218,Teethers,76,Baby Accessories,27,Baby
+1219,Traditional Meal Base,163,Meal Bases,16,Condiments
+1220,Chocolate / Hazelnut,307,Sweet Spreads,143,Spreads
+1221,Cosmetic Bags / Cases,164,Cosmetics Accessories,20,Personal Needs
+1222,Sundry Value Add Rissoles & Meatballs,16,Value Add Meat Rissoles & Meatballs,59,Value Add Meat
+1223,Men's Antiperspirants,97,Men's Deodorants,137,Mens Grooming
+1224,Kids Yoghurt,99,Other Yoghurt,134,Yoghurts
+1225,Scourer,84,Cleaning Materials,142,Cleaning Materials
+1226,>501g Shredded Cheese,104,Shredded Cheese,148,Cheese
+1227,Self Tanning Spray,331,Self Tanning,58,Sun Care
+1228,Cake Bakery Mixes,320,Bakery Mix,73,Cooking Needs
+1229,Packet Noodles,154,Noodles,69,Hot & Cold Meals
+1230,Lozenge,44,Nicotine Replacement Treatment,4,Medicinal
+1231,Sundry Fish - Pre-Packed,435,Fish - Pre-Packed,75,Seafood - Pre-Packed
+1232,Arrangements,488,Florals,136,Green Life
+1233,Pasta Bakes,196,Pasta Sauce,16,Condiments
+1234,Sundry Deli Sundires,82,Deli Sundires,38,Delicatessen
+1235,Pasta Value Pack,51,Side Dishes,69,Hot & Cold Meals
+1236,Frozen Poultry Sundry,306,Frozen Poultry Sundry,31,Frozen Poultry
+1237,Disposable - Cutlery,341,Disposable Tableware,129,Disposable
+1238,Lamb Racks Retail Ready,319,Lamb Racks,117,Lamb
+1239,Sundry Haccp,268,Haccp Store Use Supplies,146,Store Use Supplies
+1240,Immune,292,Vitamins,52,Vitamins & Supplements
+1241,Bone Health,292,Vitamins,52,Vitamins & Supplements
+1242,Sundry Chilled Bread,440,Chilled Bread,109,Chilled Bread
+1243,Muffin Mix,320,Bakery Mix,73,Cooking Needs
+1244,Men's Aftershave / Cologne,97,Men's Deodorants,137,Mens Grooming
+1245,Lifestyle Beverages Multipack,146,Lifestyle Beverages Multipack,149,Lifestyle Beverages
+1246,Coconut Dry / Shredded,431,Baking Needs,73,Cooking Needs
+1247,Cooking Sauces Food Service,501,Condiments Food Service,101,Dry Grocery Food Service
+1248,Reflector Lights,492,Globes,33,Electrical
+1249,Sundry Mixed Vegetables,302,Mixed Vegetables,82,Frozen Vegetables
+1250,Lamb Forequarters Retail Ready,102,Lamb Forequarters,117,Lamb
+1251,Garbage Bags,252,Bags,139,Paper Goods
+1252,Sundry Salads Deli,167,Salads - Deli,38,Delicatessen
+1253,Mexican Sauces & Paste,20,Mexican Food,70,International Food
+1254,251-500g Cheese Blocks,265,Cheese Blocks,148,Cheese
+1255,Buckets Plastic,437,Bulky Plastic,35,Household Cleaning General Merchandise
+1256,Salad Bowl,115,Salad,47,Value Add Produce
+1257,Seafood Bulk Cooked Prawns Peeled,291,Seafood Bulk Frozen,5,Seafood
+1258,Mainstream Juice 1 - 2.5l,497,Mainstream Juice,49,Juice
+1259,Proprietary Health & Wellbeing Wraps,79,Proprietary Health & Wellbeing,36,Proprietary
+1260,Firelighters,161,Barbecue / Coolers / Picnic,102,Outdoor / Leisure
+1261,Rice Crackers,259,Savoury Biscuits,15,Biscuits
+1262,Nail Polish Remover,287,Nail,41,Cosmetics
+1263,Coffee Bags,489,Roast & Ground Coffee,28,Coffee
+1264,Manufactured Meats Sliced Deli,45,Sliced / Shaved Meats,38,Delicatessen
+1265,Premium Automatic,173,Automatic,94,Dishwashing
+1266,Bitesize Medium,384,Bitesize / Sharebags,121,Confectionery
+1267,In-Store Bakery Breads Sourdough,370,In-Store Bakery Breads,119,In Store Bakery
+1268,Men's Shower Gels,230,Men's Skincare,137,Mens Grooming
+1269,Sundry Sugar-Bags,272,Sugar - Bags,121,Confectionery
+1270,Chalk / Crayons,221,School / Home Stationery,3,Stationery
+1271,Rice Value Pack,51,Side Dishes,69,Hot & Cold Meals
+1272,Kids Toothpaste,395,Toothpaste,138,Oral Care
+1273,Disposable - Plates,341,Disposable Tableware,129,Disposable
+1274,Chilled Dog Food Varieties,213,Chilled Dog Food,104,Pet Food
+1275,Ironing Aids,326,Pegs / Lines & Accessories,35,Household Cleaning General Merchandise
+1276,Microwave - Food Stroage,397,Food Storage,8,Housewares
+1277,Throat Lozenges,130,Cough & Cold,4,Medicinal
+1278,Gifting,313,Seasonal Events,39,Seasonal
+1279,Cat Treats,215,Cat Treats,11,Cat Food
+1280,Lamb Rumps Production Primal,246,Lamb Rumps,117,Lamb
+1281,Still Flavoured > 600ml,496,Still Water,57,Water
+1282,Streaky Bacon Deli,233,Bacon,38,Delicatessen
+1283,Sundry Traditional,309,Traditional,96,Frozen Meals
+1284,,48,Garlic,127,Hard Produce
+1285,Occupy / Entertain,119,Dog Treats,86,Dog Food
+1286,Hair Brushes,164,Cosmetics Accessories,20,Personal Needs
+1287,Sundry Packaged Pastries,279,Packaged Pastries,12,Packaged
+1288,Xmas Sharepacks,10,Xmas Seasonal,125,Seasonal Lines
+1289,Pork Value Added Varieties,131,Pork Value Added,74,Pork
+1290,Bath Salts,41,Soap & Bath,71,Soap & Bath
+1291,Beetroot Canned,212,Vegetables,40,Vegetables & Salads
+1292,Denture Care Powder,414,Denture Care,138,Oral Care
+1293,Poultry Fresh Mince,158,Poultry Standard Fresh,120,Poultry
+1294,Value Add Meat Sundry,503,Value Add Meat Sundry,59,Value Add Meat
+1295,Singles Water Ice,475,Singles,6,Ice Cream
+1296,Multipack Value,494,Multipack,6,Ice Cream
+1297,Game Sundry,125,Game Sundry,84,Game
+1298,Pork Forequarters Retail Ready,466,Pork Forequarters,74,Pork
+1299,Sundry Packaged Cakes,226,Packaged Cakes,12,Packaged
+1300,Seafood Frozen Salmon,142,Seafood Frozen,5,Seafood
+1301,Gadgets,224,Kitchenware,8,Housewares
+1302,Manual Standard Toothbrushes,457,Toothbrushes,138,Oral Care
+1303,White Wine Vinegars,100,Vinegars,16,Condiments
+1304,Indoor Activities & Games,366,Christmas - Toys,39,Seasonal
+1305,Sundry Laundry Needs,218,Laundry Needs,65,Laundry Needs
+1306,Energy Drinks Singles Can >= 500ml,262,Energy Drinks - Singles,99,Energy Drinks
+1307,Damp Absorbers Crystal,443,Damp Absorbers,21,Household Cleaners
+1308,Sundry Other Cooking Needs,353,Other Cooking Needs,73,Cooking Needs
+1309,Summer - Manchester,264,Summer,39,Seasonal
+1310,Laundry Baskets,437,Bulky Plastic,35,Household Cleaning General Merchandise
+1311,Sundry Baby Accessories,76,Baby Accessories,27,Baby
+1312,Sundry Asian Snacks,8,Asian Snacks,91,Frozen Snack/Entertaining
+1313,Specialist Nappies,383,Nappies,27,Baby
+1314,Wash Soda / Softener,128,Laundry,21,Household Cleaners
+1315,Plant Based Block Cheese,470,Plant Based Cheese,103,Chilled Health
+1316,Premium Formula,96,Formula,27,Baby
+1317,Children's,292,Vitamins,52,Vitamins & Supplements
+1318,Tidy Bags,252,Bags,139,Paper Goods
+1319,Liquid Body Wash,41,Soap & Bath,71,Soap & Bath
+1320,Corn,83,Frozen Vegetables,82,Frozen Vegetables
+1321,Still Plain Multipack < = 600ml,496,Still Water,57,Water
+1322,Still Plain > 600ml,496,Still Water,57,Water
+1323,Single Wipes / Wet Towels,405,Wipes / Wet Towels,113,Wipes / Wet Towels
+1324,Food Colours,431,Baking Needs,73,Cooking Needs
+1325,Fruits Crystallised / Glace,335,Dried Fruit & Nuts,73,Cooking Needs
+1326,Bathroom Accessories,253,Manchester,106,Manchester
+1327,Ice Cream Frozen Food Service,127,Ice Cream Food Service,116,Frozen Food Service
+1328,Sundry Cards & Wrapping,219,Cards & Wrapping,3,Stationery
+1329,Frozen Meat - Chicken Nugget,476,Frozen Meat - Chicken,77,Frozen Meat
+1330,Multipack Bar Soap,318,Bar Soap,71,Soap & Bath
+1331,Sundry Chilled Desserts,473,Chilled Desserts,132,Desserts
+1332,Premium Juice 1 - 1.5l,222,Premium Juice,49,Juice
+1333,Packaged Breads Rolls,339,Packaged Breads,12,Packaged
+1334,Delicatessen Sundry,232,Delicatessen Sundry,38,Delicatessen
+1335,Lamb Loin Retail Ready,23,Lamb Loin,117,Lamb
+1336,Sundry Nuts & Jerky,120,Nuts & Jerky,133,Nuts & Jerky
+1337,Coffee Filter Papers,327,Coffee Accessories,28,Coffee
+1338,Dry Breakfast,357,Portable Cereals,93,Breakfast Foods
+1339,Sundry Other Nutritional Snacks,392,Other Nutritional Snacks,90,Nutritional Snacks
+1340,Toilet Tidies,18,Brushware,35,Household Cleaning General Merchandise
+1341,Beef Stir Fry,129,Beef Stir Fry / Dice / Schnitzel,114,Beef
+1342,Plant Based Sausage,459,Plant Based Smallgoods,103,Chilled Health
+1343,Take Home Tubs Frozen Yoghurt,255,Take Home Tubs,6,Ice Cream
+1344,Men's Roll-on,211,Roll-On,42,Deodorants
+1345,Gum Multi,288,Gum,121,Confectionery
+1346,Manual Sprays,448,Air Fresheners / Deodorisers,85,Household Needs
+1347,Crinkle Cut,350,Mainstream Potato,43,Snacks
+1348,Seafood Frozen Cooked Prawns Peeled,142,Seafood Frozen,5,Seafood
+1349,Jelly,191,Desserts,34,Desserts & Toppings
+1350,Poultry Free Range Thigh Fillet,328,Poultry Free Range,120,Poultry
+1351,Tools Hardware,184,Hardware,128,Hardware
+1352,Pasties,11,Pasties,98,Frozen Pies & Pastries
+1353,Concentrated Liquid Laundry,128,Laundry,21,Household Cleaners
+1354,Pre Packed Salads Deli,167,Salads - Deli,38,Delicatessen
+1355,Vegetable Salads Deli,167,Salads - Deli,38,Delicatessen
+1356,Mints Single,33,Mints,121,Confectionery
+1357,Dried Tomatoes Condiments,74,Pickled Vegetables,16,Condiments
+1358,Cooking Chilled Spreads,416,Other Chilled Spreads,100,Chilled Spreads
+1359,Indian Sauces & Paste,162,Indian Food,70,International Food
+1360,Blue Laundry,128,Laundry,21,Household Cleaners
+1361,Liners,73,Sanitary Liners,29,Feminine Hygiene
+1362,Polish Shoe Care,275,Shoe Care,85,Household Needs
+1363,Decorations,431,Baking Needs,73,Cooking Needs
+1364,Talcum Powder,148,Deodorant Accessories,42,Deodorants
+1365,<=250g Cheese Blocks,265,Cheese Blocks,148,Cheese
+1366,Convienence Nappies,383,Nappies,27,Baby
+1367,Non-Dairy Yoghurt,99,Other Yoghurt,134,Yoghurts
+1368,1000 Island Salad Dressing,15,Dressings & Mayonnaises,16,Condiments
+1369,Chocolate Single,481,Kids,121,Confectionery
+1370,Soup - Premium,140,Soup - Premium,9,Soup
+1371,Poultry Fresh Value Added Rissoles,393,Poultry Fresh Value Added,120,Poultry
+1372,Licensed Pre-School,349,Licensed Toys,18,Toys
+1373,Sundry Thai Food,101,Thai Food,70,International Food
+1374,Small Self Consumption,17,Self Consumption,43,Snacks
+1375,Sundry Deodorants,210,Deodorants,42,Deodorants
+1376,Premium Health Dry Cat Food,118,Dry Cat Food,11,Cat Food
+1377,Women's Blades,269,Women's Blades & Razors,87,Women's Hair Removal
+1378,,375,,97,Meals
+1379,Lifestyle Beverages Singles < 500ml,258,Lifestyle Beverages - Singles,149,Lifestyle Beverages
+1380,Wet Spices,379,Herbs & Spices,73,Cooking Needs
+1381,Infusions,38,Teas,122,Beverages
+1382,Bags Chews,272,Sugar - Bags,121,Confectionery
+1383,Take Home Tubs Super Premium,255,Take Home Tubs,6,Ice Cream
+1384,Gardening Products Sundry,421,Gardening Products Sundry,48,Gardening Products
+1385,Cold Desserts Bavarian,183,Cold Desserts,115,Frozen Desserts
+1386,Wraps Paper,364,Wraps & Foils,139,Paper Goods
+1387,Bags Hard Lollies,272,Sugar - Bags,121,Confectionery
+1388,Household Cleaners Sundry,6,Household Cleaners Sundry,21,Household Cleaners
+1389,Carpet Foam,65,Carpet,21,Household Cleaners
+1390,Jerky,120,Nuts & Jerky,133,Nuts & Jerky
+1391,Hard Table Cheese Deli,452,Cheese - Deli,38,Delicatessen
+1392,Non-Alcoholic Sparkling Wine,276,Non-Alcoholic Beverages All,24,Non Alcoholic Beverages
+1393,Creams,468,Depilatories,87,Women's Hair Removal
+1394,Tuna Small Can (<=95g),117,Tuna,108,Canned Seafood
+1395,Packaged Breads Savoury,339,Packaged Breads,12,Packaged
+1396,Desserts Sundry,42,Desserts Sundry,132,Desserts
+1397,Outdoor Water Toys & Pool and Beach Toys,366,Christmas - Toys,39,Seasonal
+1398,Premium Toothpaste,395,Toothpaste,138,Oral Care
+1399,Asian Simmer Sauces,380,Sauces Cooking,16,Condiments
+1400,Gum,44,Nicotine Replacement Treatment,4,Medicinal
+1401,Breadcrumbs & Batter Mix,353,Other Cooking Needs,73,Cooking Needs
+1402,Sundry Nappies,383,Nappies,27,Baby
+1403,Hand Towels,253,Manchester,106,Manchester
+1404,Asian Sauces & Paste,225,Asian Food,70,International Food
+1405,Snacks & Savouries Food Service,284,Snacks & Savouries Food Service,101,Dry Grocery Food Service
+1406,Licensed Toys,366,Christmas - Toys,39,Seasonal
+1407,Knives,224,Kitchenware,8,Housewares
+1408,Semi-Permanet Long Life,478,Hair Colour,131,Hair Colour
+1409,Sundry Meals - Sides,373,Meals - Sides,97,Meals
+1410,Lawn Seed,321,Gardening,48,Gardening Products
+1411,Clumping,441,Cat Litter,45,Cat Litter
+1412,Multipack Super Premium,494,Multipack,6,Ice Cream
+1413,Packaged Breads International,339,Packaged Breads,12,Packaged
+1414,Beef Blade Retail Ready,410,Beef Blade,114,Beef
+1415,Wrapping,345,Christmas - General,39,Seasonal
+1416,Advertising - Sundries,347,Administration Needs,72,Administration
+1417,Bin Liners Bags,252,Bags,139,Paper Goods
+1418,Fish Battered / Crumbed Fingers,62,Frozen Fish,51,Frozen Seafood
+1419,Sundry Cotton,56,Cotton,4,Medicinal
+1420,Chilled Juices & Drinks Sundry,39,Chilled Juices & Drinks Sundry,54,Chilled Juices & Drinks
+1421,>750g Cheese Blocks,265,Cheese Blocks,148,Cheese
+1422,Kids Novelty,481,Kids,121,Confectionery
+1423,Chilled Cat Food Mince,317,Chilled Cat Food,104,Pet Food
+1424,Pegs,326,Pegs / Lines & Accessories,35,Household Cleaning General Merchandise
+1425,Poultry Speciality Plain Portion Duck,423,Poultry Speciality,120,Poultry
+1426,Gum Single,288,Gum,121,Confectionery
+1427,Leads / Chains,138,Dog / Cat,140,Pet Accessories
+1428,Milk Wet Dog Food,172,Wet Dog Food,86,Dog Food
+1429,Packaged Seasnal Xmas Pies & Tarts,436,Packaged Seasonal,12,Packaged
+1430,Xmas Novelties,10,Xmas Seasonal,125,Seasonal Lines
+1431,Pickles Condiments,74,Pickled Vegetables,16,Condiments
+1432,Artificial Sweeteners,369,Sugar,73,Cooking Needs
+1433,Sundry Vegetables Frozen Food Service,480,Vegetables Frozen Food Service,116,Frozen Food Service
+1434,Seeds Garden,321,Gardening,48,Gardening Products
+1435,Disposable - Paper Napkins,341,Disposable Tableware,129,Disposable
+1436,Packaged Health & Wellbeing Rolls,396,Packaged Health & Wellbeing,12,Packaged
+1437,Sundry Canned Vegetables,212,Vegetables,40,Vegetables & Salads
+1438,Balsamic Vinegars,100,Vinegars,16,Condiments
+1439,Sundry Snacks & Savouries Food Service,284,Snacks & Savouries Food Service,101,Dry Grocery Food Service
+1440,Fish Battered / Crumbed Portions,62,Frozen Fish,51,Frozen Seafood
+1441,Men's Blades,156,Men's Blades & Razors,137,Mens Grooming
+1442,Winterweights,166,Hosiery,79,Apparel
+1443,Plain Biscuits,175,Sweet Biscuits,15,Biscuits
+1444,Disposable - Table Decorations / Cloths,341,Disposable Tableware,129,Disposable
+1445,Sundry Value Lines,323,Value Lines,32,Value Lines
+1446,Powdered Concentrate Laundry,128,Laundry,21,Household Cleaners
+1447,Newspaper,109,"Magazines, Papers & Books",78,Publications
+1448,Mexican Beans,20,Mexican Food,70,International Food
+1449,Foundation / Concealer,367,Face,41,Cosmetics
+1450,Brussel Sprouts,450,Brassica,81,Vegetable
+1451,Sundry Dips,9,Dips,19,Dips
+1452,Flashlights,174,Batteries / Flashlights,33,Electrical
+1453,Sundry Cosmetics Accessories,164,Cosmetics Accessories,20,Personal Needs
+1454,251-500g Natural Sliced Cheese,352,Sliced,148,Cheese
+1455,Auto Handle Toothbrushes,457,Toothbrushes,138,Oral Care
+1456,Halloween,313,Seasonal Events,39,Seasonal
+1457,Liquid Hand Wash Refills,424,Liquid Hand Wash,71,Soap & Bath
+1458,Unfilled Pasta,385,Pasta - Fresh,2,Pasta - Fresh
+1459,Sundry Teas,38,Teas,122,Beverages
+1460,Self Raising Flour,208,Flour & Bread Mix,73,Cooking Needs
+1461,Tinsel,345,Christmas - General,39,Seasonal
+1462,Spray Disinfectant,462,Disinfectants,21,Household Cleaners
+1463,Lotions / Creams / Oils,3,Toiletries,27,Baby
+1464,Pizza - Premium,85,Pizza - Premium,46,Pizza
+1465,Mops,18,Brushware,35,Household Cleaning General Merchandise
+1466,Bath Mats,253,Manchester,106,Manchester
+1467,Packaged Breads Sweet,339,Packaged Breads,12,Packaged
+1468,Value Add Sausages Chicken,5,Value Add Meat Sausages,59,Value Add Meat
+1469,Soft Drink Glass Bottle,299,Soft Drinks,55,Soft Drinks
+1470,Gloss,185,Lips,41,Cosmetics
+1471,Bathroom Foam,362,Bathroom,21,Household Cleaners
+1472,Pre-School,366,Christmas - Toys,39,Seasonal
+1473,Value / Family Conditioner,408,Conditioner,66,Hair Care
+1474,Women's Liners,283,Liners,30,Incontinence
+1475,Fasteners & Hooks,184,Hardware,128,Hardware
+1476,Picnicware / Acrylic / Plastic Cutlery,161,Barbecue / Coolers / Picnic,102,Outdoor / Leisure
+1477,Raw Sugar,369,Sugar,73,Cooking Needs
+1478,Ballpoint Pens,221,School / Home Stationery,3,Stationery
+1479,French Shallot,360,Onion,127,Hard Produce
+1480,Chilled Dog Food Roll,213,Chilled Dog Food,104,Pet Food
+1481,Sundry Summer,264,Summer,39,Seasonal
+1482,Pens / Pencils / Markers,221,School / Home Stationery,3,Stationery
+1483,Ice,169,Ice,26,Ice
