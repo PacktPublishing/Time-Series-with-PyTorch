@@ -19,7 +19,6 @@ Sales, prices and dates are unchanged.
 | `data/series_features.parquet` | 18,692 | Time-series features and cluster label per series |
 | `data/items.csv` | 18,692 | Product attributes and hierarchy ids |
 | `data/hierarchy.csv` | 1,483 | Subclass → class → department, with names |
-| `data/cpi_weekly_deflator.csv` | 193 | Consumer price index and deflator for real-price modelling |
 | `nbeats_weekly_phase3.py` | | Example global model (NBEATSx, NeuralForecast) |
 
 ## Joining
@@ -29,7 +28,6 @@ sales_weekly.unique_id  = "{item_id}_S1"
 series_features.unique_id = sales_weekly.unique_id
 items.item_id           -> parse from unique_id
 items.subclass_id       -> hierarchy.subclass_id
-sales_weekly.week_start = cpi_weekly_deflator.ds
 ```
 
 ## sales_weekly.parquet
@@ -69,11 +67,11 @@ sales_weekly.week_start = cpi_weekly_deflator.ds
 
 - price and promotion as future covariates;
 - class, subclass, item group, sales class and cluster as static covariates;
-- Optuna tuning.
+- a single fit with fixed hyperparameters (no tuning), followed by a price simulation that estimates per-series elasticity.
 
 It holds out the final 14 weeks (from 2025-04-16) for testing and compares against Naive and Seasonal Naive baselines.
 
-Requirements: `neuralforecast`, `statsforecast`, `utilsforecast`, `polars`, `pandas`, `optuna`, `torch`, `matplotlib`, `seaborn`.
+Requirements: `neuralforecast`, `statsforecast`, `utilsforecast`, `polars`, `pandas`, `torch`, `matplotlib`, `seaborn`.
 
 ```bash
 python nbeats_weekly_phase3.py
