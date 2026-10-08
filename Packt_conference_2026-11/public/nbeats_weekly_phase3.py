@@ -13,7 +13,6 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import seaborn as sns
-import optuna
 import torch
 
 from neuralforecast import NeuralForecast
@@ -52,12 +51,21 @@ RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
 FORECAST_HORIZON   = 14          # weeks — matches actual test window
 FREQ = "W-WED"    # Wednesday weeks
-N_TRIALS           = 30
 RANDOM_SEED        = 46335
 
-# Split boundaries (week_start dates, Wednesday)
+# Split boundary (week_start date, Wednesday)
 FINAL_TEST_START = "2025-04-16"
-HPO_VAL_START    = "2025-01-15"
+
+# Fixed NBEATSx settings — a sensible starting point, not tuned
+STACK_TYPES   = ["identity", "trend", "seasonality", "exogenous"]
+N_BLOCKS      = [1, 1, 1, 1]
+MLP_SIZE      = 512
+INPUT_SIZE    = 12
+MAX_STEPS     = 15000
+DROPOUT       = 0.2
+LEARNING_RATE = 1e-3
+BATCH_SIZE    = 128
+WEIGHT_DECAY  = 5e-7
 
 # ============================================================================
 # HELPERS
@@ -144,7 +152,7 @@ cluster_slim = clusters.select(cluster_cols).unique("unique_id")
 weekly = weekly.join(cluster_slim, on="unique_id", how="left")
 
 # ============================================================================
-# PRICE DATA QUALITY — remove series with corrupt prices before deflation
+# PRICE DATA QUALITY — remove series with corrupt prices
 # ============================================================================
 
 print("Price data quality checks...")
@@ -163,43 +171,6 @@ if zero_price_ids:
 
 print(f"  Clean price range: {weekly['sale_price'].min():.2f} → {weekly['sale_price'].max():.2f}")
 print(f"  Series remaining: {weekly['unique_id'].n_unique()}")
-
-# ============================================================================
-# CPI DEFLATION — convert nominal to real prices
-# ============================================================================
-
-print("Applying CPI deflation...")
-
-cpi_w = pl.read_csv(DATA_DIR / "cpi_weekly_deflator.csv", try_parse_dates=True)
-cpi_w = cpi_w.with_columns(pl.col("ds").cast(pl.Date))
-
-weekly = weekly.join(cpi_w.select(["ds", "deflator"]), on="ds", how="left")
-
-n_null_deflator = weekly.filter(pl.col("deflator").is_null()).height
-if n_null_deflator > 0:
-    print(f"  WARNING: {n_null_deflator} rows with no CPI deflator — filling")
-    weekly = weekly.with_columns(
-        pl.col("deflator").fill_null(strategy="forward").fill_null(strategy="backward")
-    )
-
-weekly = weekly.with_columns(
-    (pl.col("sale_price") / pl.col("deflator")).cast(pl.Float32).alias("sale_price")
-)
-
-# Post-deflation sanity check
-n_inf = weekly.filter(pl.col("sale_price").is_infinite()).height
-n_nan = weekly.filter(pl.col("sale_price").is_nan()).height
-if n_inf > 0 or n_nan > 0:
-    problem_ids = weekly.filter(
-        pl.col("sale_price").is_infinite() | pl.col("sale_price").is_nan()
-    ).select("unique_id").unique()
-    print(f"  ⚠ Post-deflation: {n_inf} inf, {n_nan} NaN across {problem_ids.height} series")
-    raise ValueError("inf/NaN in sale_price after CPI deflation — fix upstream data")
-else:
-    print("  ✓ No inf/NaN in deflated sale_price")
-
-weekly = weekly.drop("deflator")
-print(f"  Deflated price range: {weekly['sale_price'].min():.2f} → {weekly['sale_price'].max():.2f}")
 
 # ============================================================================
 # FEATURE ENGINEERING — RELATIVE PRICE FEATURES
@@ -451,24 +422,19 @@ df_pd, qualifying_ids = oversample_promotional_graduated(
 static_df = df_pd[["unique_id"] + STATIC_COLS].drop_duplicates("unique_id").copy()
 
 # ============================================================================
-# TRAIN / HPO_VAL / FINAL_TEST SPLITS
+# TRAIN / FINAL_TEST SPLIT
 # ============================================================================
 
 train_df = df_pd[["unique_id", "ds", "y"] + FUTR_EXOG_COLS].copy()
 
 final_test_start = pd.Timestamp(FINAL_TEST_START)
-hpo_val_start    = pd.Timestamp(HPO_VAL_START)
 
-hpo_train   = train_df[train_df["ds"] < hpo_val_start].copy()
-hpo_val     = train_df[(train_df["ds"] >= hpo_val_start) & (train_df["ds"] < final_test_start)].copy()
 final_train = train_df[train_df["ds"] < final_test_start].copy()
 final_test  = train_df[train_df["ds"] >= final_test_start].copy()
 
 print(f"\nSplit summary:")
-print(f"  HPO train:   {hpo_train['ds'].min().date()} → {hpo_train['ds'].max().date()} "
-      f"| {hpo_train['unique_id'].nunique()} series")
-print(f"  HPO val:     {hpo_val['ds'].min().date()} → {hpo_val['ds'].max().date()}")
-print(f"  Final train: {final_train['ds'].min().date()} → {final_train['ds'].max().date()}")
+print(f"  Final train: {final_train['ds'].min().date()} → {final_train['ds'].max().date()} "
+      f"| {final_train['unique_id'].nunique()} series")
 print(f"  Final test:  {final_test['ds'].min().date()} → {final_test['ds'].max().date()}")
 print(f"  Test weeks per series: {final_test.groupby('unique_id').size().unique().tolist()}")
 
@@ -493,164 +459,28 @@ naive_preds = naive_preds.reset_index()
 print(f"  Baselines done: {naive_preds.shape}")
 
 # ============================================================================
-# HPO — NBEATSx
+# FIT NBEATSx — single model, fixed hyperparameters
 # ============================================================================
 
-print(f"\nStarting NBEATSx HPO ({N_TRIALS} trials)...")
+print("\nFitting NBEATSx...")
+clear_gpu()
 
 fcst_mase  = partial(mase,  seasonality=52)
 fcst_rmsse = partial(rmsse, seasonality=52)
 
-
-def objective(trial: optuna.Trial) -> float:
-    clear_gpu()
-    try:
-        stack_types = trial.suggest_categorical("stack_types", [
-            ["identity", "trend", "seasonality", "exogenous"],
-            ["identity", "trend", "exogenous"],
-            ["identity", "seasonality", "exogenous"],
-        ])
-        n_stacks = len(stack_types)
-
-        if n_stacks == 4:
-            n_blocks = trial.suggest_categorical("n_blocks_4", [
-                [2, 2, 2, 2], [1, 1, 1, 1], [1, 2, 2, 1]
-            ])
-        else:
-            n_blocks = trial.suggest_categorical("n_blocks_3", [
-                [2, 2, 2], [1, 1, 1], [1, 2, 1]
-            ])
-
-        mlp_size  = trial.suggest_categorical("mlp_size", [512, 768])
-        mlp_units = [[mlp_size, mlp_size]] * n_stacks
-
-        input_size = trial.suggest_categorical("input_size", [8, 10, 12, 14])
-        max_steps  = trial.suggest_categorical("max_steps", [15000, 25000, 35000, 45000])
-        dropout    = trial.suggest_float("dropout", 0.15, 0.30)
-        lr         = trial.suggest_float("learning_rate", 3e-4, 2e-3, log=True)
-        batch_size = trial.suggest_categorical("batch_size", [64, 128, 256])
-        wd         = trial.suggest_float("weight_decay", 1e-7, 1e-6, log=True)
-
-        val_check = max(100, max_steps // 150)
-
-        model = NBEATSx(
-            h=FORECAST_HORIZON,
-            input_size=input_size,
-            n_harmonics=3,
-            n_polynomials=3,
-            stack_types=stack_types,
-            n_blocks=n_blocks,
-            mlp_units=mlp_units,
-            dropout_prob_theta=dropout,
-            learning_rate=lr,
-            batch_size=batch_size,
-            max_steps=max_steps,
-            val_check_steps=val_check,
-            early_stop_patience_steps=200,
-            scaler_type="robust",
-            futr_exog_list=FUTR_EXOG_COLS,
-            stat_exog_list=STATIC_COLS,
-            loss=HuberLoss(),
-            valid_loss=MAE(),
-            optimizer=torch.optim.Adam,
-            optimizer_kwargs={"weight_decay": wd},
-            accelerator="gpu",
-            devices=[0],
-            strategy="auto",
-            enable_checkpointing=False,
-            logger=False,
-            enable_model_summary=False,
-            gradient_clip_val=1.0,
-            random_seed=RANDOM_SEED,
-        )
-
-        nf = NeuralForecast(models=[model], freq=FREQ)
-        nf.fit(df=final_train, static_df=static_df,
-               val_size=FORECAST_HORIZON, verbose=False)
-
-        time.sleep(2)
-        preds = nf.predict(futr_df=final_test, static_df=static_df)
-        preds = preds[preds["unique_id"].isin(real_ids)].copy()
-
-        if preds["NBEATSx"].isna().any():
-            del model, nf; clear_gpu()
-            return float("inf")
-
-        eval_df = final_test.merge(
-            preds[["unique_id", "ds", "NBEATSx"]], on=["unique_id", "ds"], how="left"
-        )
-        metrics = evaluate(eval_df, train_df=final_train,
-                           metrics=[rmse], models=["NBEATSx"],
-                           target_col="y", id_col="unique_id")
-        val_loss = metrics[metrics["metric"] == "rmse"]["NBEATSx"].median()
-
-        if not np.isfinite(val_loss):
-            del model, nf; clear_gpu()
-            return float("inf")
-
-        print(f"  Trial {trial.number:>2d} | RMSE {val_loss:.4f} | "
-              f"stacks={stack_types} input={input_size} steps={max_steps}")
-        del model, nf; clear_gpu(); time.sleep(3)
-        return float(val_loss)
-
-    except Exception as e:
-        print(f"  Trial {trial.number} failed: {e}")
-        clear_gpu()
-        return float("inf")
-
-
-study = optuna.create_study(
-    direction="minimize",
-    study_name="NBEATSx_weekly_phase3",
-    sampler=optuna.samplers.TPESampler(seed=RANDOM_SEED),
-    pruner=optuna.pruners.MedianPruner(n_startup_trials=5, n_warmup_steps=5000),
-)
-
-hpo_start = time.time()
-study.optimize(objective, n_trials=N_TRIALS,
-               callbacks=[lambda s, t: clear_gpu()],
-               gc_after_trial=True)
-hpo_time = time.time() - hpo_start
-
-print(f"\nHPO complete in {hpo_time/60:.1f} min")
-print(f"Best trial {study.best_trial.number} | RMSE {study.best_value:.4f}")
-for k, v in study.best_params.items():
-    print(f"  {k}: {v}")
-
-hpo_df = study.trials_dataframe()
-hpo_df.to_csv(RESULTS_DIR / "hpo_trials_nbeatsx_weekly_phase3.csv", index=False)
-
-best_params_hpo = dict(study.best_params.items())
-
-# ============================================================================
-# REFIT BEST MODEL
-# ============================================================================
-
-print("\nRefitting best model on full training data...")
-clear_gpu()
-
-bp = best_params_hpo
-stack_types = bp["stack_types"]
-n_stacks    = len(stack_types)
-n_blocks    = bp.get("n_blocks_4") if n_stacks == 4 else bp.get("n_blocks_3")
-mlp_size    = bp["mlp_size"]
-mlp_units   = [[mlp_size, mlp_size]] * n_stacks
-max_steps   = bp["max_steps"]
-val_check   = max(100, max_steps // 150)
-
-best_model = NBEATSx(
+model = NBEATSx(
     h=FORECAST_HORIZON,
-    input_size=bp["input_size"],
+    input_size=INPUT_SIZE,
     n_harmonics=3,
     n_polynomials=3,
-    stack_types=stack_types,
-    n_blocks=n_blocks,
-    mlp_units=mlp_units,
-    dropout_prob_theta=bp["dropout"],
-    learning_rate=bp["learning_rate"],
-    batch_size=bp["batch_size"],
-    max_steps=max_steps,
-    val_check_steps=val_check,
+    stack_types=STACK_TYPES,
+    n_blocks=N_BLOCKS,
+    mlp_units=[[MLP_SIZE, MLP_SIZE]] * len(STACK_TYPES),
+    dropout_prob_theta=DROPOUT,
+    learning_rate=LEARNING_RATE,
+    batch_size=BATCH_SIZE,
+    max_steps=MAX_STEPS,
+    val_check_steps=max(100, MAX_STEPS // 150),
     early_stop_patience_steps=200,
     scaler_type="robust",
     futr_exog_list=FUTR_EXOG_COLS,
@@ -658,7 +488,7 @@ best_model = NBEATSx(
     loss=HuberLoss(),
     valid_loss=MAE(),
     optimizer=torch.optim.Adam,
-    optimizer_kwargs={"weight_decay": bp["weight_decay"]},
+    optimizer_kwargs={"weight_decay": WEIGHT_DECAY},
     accelerator="gpu",
     devices=[0],
     strategy="auto",
@@ -669,14 +499,14 @@ best_model = NBEATSx(
     random_seed=RANDOM_SEED,
 )
 
-nf = NeuralForecast(models=[best_model], freq=FREQ)
+nf = NeuralForecast(models=[model], freq=FREQ)
 fit_start = time.time()
 nf.fit(df=final_train, static_df=static_df,
        val_size=FORECAST_HORIZON, verbose=False)
 fit_time = time.time() - fit_start
 print(f"  Fit time: {fit_time:.0f}s")
 
-nf.save(path=str(RESULTS_DIR / "nbeatsx_weekly_best_phase3"), overwrite=True) #<<<<<<<<<<<<<<<<<<<<<< HERE
+nf.save(path=str(RESULTS_DIR / "nbeatsx_weekly_best_phase3"), overwrite=True)
 
 # Training curves
 train_traj = nf.models[0].train_trajectories
@@ -687,7 +517,7 @@ ax.plot([x[0] for x in train_traj], [x[1] for x in train_traj], label="Train")
 ax.plot([x[0] for x in valid_traj], [x[1] for x in valid_traj], label="Valid")
 ax.set_yscale("log")
 ax.set_xlabel("Step"); ax.set_ylabel("Loss (log)"); ax.legend(); ax.grid(alpha=0.3)
-ax.set_title("NBEATSx Weekly — Training Curves (Phase 3, CPI-deflated)")
+ax.set_title("NBEATSx Weekly — Training Curves")
 plt.tight_layout()
 plt.savefig(RESULTS_DIR / "training_curves_nbeatsx_weekly_phase3.png", dpi=150)
 plt.close()
@@ -862,7 +692,7 @@ if "sale_class" in metrics_df.columns:
 elast_df.to_csv(RESULTS_DIR / "model_elasticity_nbeatsx_weekly_phase3.csv", index=False)
 
 # Elasticity summary
-print(f"\nElasticity summary (NBEATSx weekly Phase 3 — CPI-deflated):")
+print(f"\nElasticity summary (NBEATSx weekly Phase 3):")
 print(f"  Median: {elast_df['model_elasticity_median'].median():.3f}")
 print(f"  Perverse (>0): {(elast_df['model_elasticity_median'] > 0).sum()}")
 print(f"  Highly elastic (<-1): {(elast_df['model_elasticity_median'] < -1).sum()}")
@@ -880,7 +710,7 @@ ax.hist(vals, bins=80, edgecolor="black", linewidth=0.4, color="#0072B2", alpha=
 ax.axvline(vals.median(), color="red", linestyle="--", linewidth=2,
            label=f"Median: {vals.median():.2f}")
 ax.set_xlabel("Model Elasticity"); ax.set_ylabel("Count")
-ax.set_title("NBEATSx Weekly — Elasticity Distribution (CPI-deflated)"); ax.legend(); ax.grid(alpha=0.3)
+ax.set_title("NBEATSx Weekly — Elasticity Distribution"); ax.legend(); ax.grid(alpha=0.3)
 
 if "sale_class" in elast_df.columns:
     ax = axes[1]
